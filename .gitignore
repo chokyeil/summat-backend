@@ -1,0 +1,17 @@
+# IntelliJ
+.idea/
+*.iml
+
+# Build
+target/
+build/
+
+# OS
+.DS_Store
+
+# Logs
+*.log
+
+# Environment
+application-prod.yml
+.env
