@@ -8,8 +8,6 @@ public class PlacesResDto {
 
     private String placeDetailAddress;
 
-//    private String place_image;
-
     private String oneLineDesc;
 
     private String placeType;

@@ -31,3 +31,6 @@ jwt:
 #  access-validity-ms: 20000      # 20초 테스트용
   access-validity-ms: 3600000      # 1시간
   refresh-validity-ms: 604800000   # 7일
+
+file:
+  upload-dir: /Users/chokyeil/summat/uploads

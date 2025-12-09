@@ -7,8 +7,11 @@ import com.summat.summat.users.CustomUserDetails;
 import com.summat.summat.users.entity.Users;
 import com.summat.summat.users.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashMap;
 import java.util.List;
@@ -16,20 +19,27 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/places")
+@Slf4j
 public class PlacesController {
     private final PlacesService placesService;
     private final UsersRepository usersRepository;
 
-    @PostMapping("/add")
-    public HashMap<String, Object> createdPlace(@RequestBody PlacesReqDto placesReqDto,
+    @PostMapping(value = "/add", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public HashMap<String, Object> createdPlace(@ModelAttribute PlacesReqDto placesReqDto,
+                                                @RequestPart(value = "image", required = false) MultipartFile image,
                                                 @AuthenticationPrincipal CustomUserDetails userDetails) {
+        log.info(">>> /places/add controller 진입!!!");
+
             Long userId = userDetails.getUser().getId();
             HashMap<String, Object> result = new HashMap<>();
 
             Users user = usersRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("유저 없음"));
 
-            boolean isCreated = placesService.createdPlace(placesReqDto, user);
+        log.info("placesReqDto.getPlaceName() = " + placesReqDto.getPlaceName());
+        log.info("placesReqDto.getPlaceDetailAddress() = " + placesReqDto.getPlaceDetailAddress());
+
+            boolean isCreated = placesService.createdPlace(placesReqDto, image, user);
 
             result.put("status", isCreated ? 200 : 500);
             result.put("message", isCreated ? "sucess place create" : "fail place create");

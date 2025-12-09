@@ -6,6 +6,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,6 +17,7 @@ import java.io.IOException;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider jwtTokenProvider;
@@ -29,24 +31,31 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     ) throws ServletException, IOException {
 
         String uri = request.getRequestURI();
+        log.info("[JWT FILTER] URI = " + uri);
 
-        // 1) 로그인/회원가입 등은 JWT 검사 스킵
         if (uri.startsWith("/auth")
                 || uri.equals("/summatUsers/signup")
                 || uri.equals("/places/list")) {
+            log.info("[JWT FILTER] 화이트리스트 → 그냥 통과");
             filterChain.doFilter(request, response);
             return;
         }
 
-        // 2) 나머지만 JWT 검사
         String header = request.getHeader("Authorization");
+        log.info("[JWT FILTER] Authorization = " + header);
 
         if (header != null && header.startsWith("Bearer ")) {
             String token = header.substring(7);
+            log.info("[JWT FILTER] token = " + token);
 
             if (jwtTokenProvider.validateToken(token)) {
+                log.info("[JWT FILTER] 토큰 유효 ✅");
+
                 String username = jwtTokenProvider.getUsername(token);
+                log.info("[JWT FILTER] username = " + username);
+
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                log.info("[JWT FILTER] userDetails = " + userDetails.getUsername());
 
                 UsernamePasswordAuthenticationToken authToken =
                         new UsernamePasswordAuthenticationToken(
@@ -56,10 +65,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         );
 
                 SecurityContextHolder.getContext().setAuthentication(authToken);
+            } else {
+                log.info("[JWT FILTER] 토큰 유효하지 않음 ❌");
             }
+        } else {
+            log.info("[JWT FILTER] Authorization 헤더 없음 또는 Bearer 아님");
         }
 
-        // 여기서 직접 403/401 보내지 말고, 체인 계속 타게 둔다
         filterChain.doFilter(request, response);
     }
+
 }

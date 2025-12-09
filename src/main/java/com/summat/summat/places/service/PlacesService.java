@@ -5,22 +5,41 @@ import com.summat.summat.places.entity.Places;
 import com.summat.summat.places.repository.PlacesRepository;
 import com.summat.summat.users.entity.Users;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.parameters.P;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.beans.factory.annotation.Value;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class PlacesService {
+    @Value("${file.upload-dir}")
+    private String uploadDir;
+
     private final PlacesRepository placesRepository;
-    public boolean createdPlace(PlacesReqDto placesReqDto, Users user) {
-        if(placesReqDto.getPlaceName() == null || placesReqDto.getPlaceDetailAddress() == null) return false;
+    public boolean createdPlace(PlacesReqDto placesReqDto, MultipartFile image, Users user) {
+        log.info("placesReqDto.getPlaceName() = " + placesReqDto.getPlaceName());
+        log.info("placesReqDto.getPlaceDetailAddress() = " + placesReqDto.getPlaceDetailAddress());
+        if(placesReqDto.getPlaceName() == null || placesReqDto.getPlaceDetailAddress() == null) {
+            log.info("여기로 빠지니???!!!");
+            return false;
+        }
+        log.info("PlacesService 진입!!");
+        String imageUrl = savePlaceImage(image);
 
         Places place = new Places();
         place.setPlaceName(placesReqDto.getPlaceName());
         place.setPlaceDetailAddress(placesReqDto.getPlaceDetailAddress());
+        place.setPlaceImageUrl(imageUrl);
         place.setOneLineDesc(placesReqDto.getOneLineDesc());
         place.setPlaceType(placesReqDto.getPlaceType());
         place.setPlaceRegion(placesReqDto.getPlaceRegion());
@@ -69,5 +88,27 @@ public class PlacesService {
         placesRepository.deleteById(placeId);
 
         return true;
+    }
+
+    private String savePlaceImage(MultipartFile image) {
+        log.info("savePlaceImage 진입!!");
+        if (image == null || image.isEmpty()) {
+            return null;
+        }
+
+        try {
+            String fileName = UUID.randomUUID() + "_" + image.getOriginalFilename();
+
+            Path placeDir = Paths.get(uploadDir, "places");
+            Files.createDirectories(placeDir);
+
+            Path savePath = placeDir.resolve(fileName);
+            Files.copy(image.getInputStream(), savePath);
+
+            return "/uploads/places/" + fileName;
+
+        } catch (IOException e) {
+            throw new RuntimeException("이미지 저장 실패", e);
+        }
     }
 }

@@ -30,7 +30,8 @@ public class Places {
     @Column(name ="place_detail_address")
     private String placeDetailAddress;
 
-//    private String place_image;
+    @Column(name = "place_image_url")
+    private String placeImageUrl;
 
     // 한줄 요약
     @Column(name = "one_line_desc")
