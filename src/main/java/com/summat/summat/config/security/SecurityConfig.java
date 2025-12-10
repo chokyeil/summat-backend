@@ -44,6 +44,7 @@ public class SecurityConfig {
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/summatUsers/signup").permitAll()
                         .requestMatchers(HttpMethod.GET, "/places/list").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/places/detail/**").permitAll()
                         // 정적 리소스 등도 필요하면 여기 permitAll
                         // .requestMatchers("/", "/index.html", "/static/**").permitAll()
                         // 나머지는 인증 필요
