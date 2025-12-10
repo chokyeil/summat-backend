@@ -1,5 +1,6 @@
 package com.summat.summat.places.controller;
 
+import com.summat.summat.places.dto.PlacesDetailResDto;
 import com.summat.summat.places.dto.PlacesReqDto;
 import com.summat.summat.places.entity.Places;
 import com.summat.summat.places.service.PlacesService;
@@ -56,7 +57,7 @@ public class PlacesController {
 
         result.put("status", resultData != null ? 200 : 500);
         result.put("message", resultData != null ? "sucess place list" : "fail place list");
-        result.put("data", resultData != null ? resultData : null);
+        result.put("data", resultData);
 
         return result;
     }
@@ -92,6 +93,20 @@ public class PlacesController {
 
         result.put("status", isRemove ? 200 : 500);
         result.put("message", isRemove ? "sucess place remove" : "fail place remove");
+
+        return result;
+    }
+
+    @GetMapping("/detail/{placeId}")
+    public HashMap<String, Object> detailPlace(@PathVariable(name = "placeId") Long placeId) {
+
+        HashMap<String, Object> result = new HashMap<>();
+
+        PlacesDetailResDto detailPlaceResult = placesService.detailPlace(placeId);
+
+        result.put("status", detailPlaceResult != null ? 200 : 500);
+        result.put("message", detailPlaceResult != null ? "detail place sucess" : "detail place fail");
+        result.put("data", detailPlaceResult);
 
         return result;
     }
