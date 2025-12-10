@@ -1,12 +1,15 @@
 package com.summat.summat.places.dto;
 
 import lombok.Data;
+import lombok.Getter;
 
-@Data
-public class PlacesResDto {
+@Getter
+public class PlacesListResDto {
     private String placeName;
 
     private String placeDetailAddress;
+
+    private String placeImageUrl;
 
     private String oneLineDesc;
 
