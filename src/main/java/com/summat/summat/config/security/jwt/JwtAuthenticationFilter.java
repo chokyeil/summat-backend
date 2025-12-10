@@ -33,13 +33,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String uri = request.getRequestURI();
         log.info("[JWT FILTER] URI = " + uri);
 
-        if (uri.startsWith("/auth")
-                || uri.equals("/summatUsers/signup")
-                || uri.equals("/places/list")) {
-            log.info("[JWT FILTER] 화이트리스트 → 그냥 통과");
-            filterChain.doFilter(request, response);
-            return;
-        }
+//        if (uri.startsWith("/auth")
+//                || uri.equals("/summatUsers/signup")
+//                || uri.equals("/places/list")
+//                || uri.equals("/places/detail")) {
+//            log.info("[JWT FILTER] 화이트리스트 → 그냥 통과");
+//            filterChain.doFilter(request, response);
+//            return;
+//        }
 
         String header = request.getHeader("Authorization");
         log.info("[JWT FILTER] Authorization = " + header);
