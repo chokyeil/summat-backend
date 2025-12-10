@@ -30,6 +30,11 @@ public class Places {
     @Column(name ="place_detail_address")
     private String placeDetailAddress;
 
+    // 가게 설명
+    @Column(name = "place_description")
+    private String placeDescription;
+
+    // 가게 이미지 파일이 있는 경로
     @Column(name = "place_image_url")
     private String placeImageUrl;
 
