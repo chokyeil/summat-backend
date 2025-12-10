@@ -1,5 +1,6 @@
 package com.summat.summat.places.service;
 
+import com.summat.summat.places.dto.PlacesDetailResDto;
 import com.summat.summat.places.dto.PlacesReqDto;
 import com.summat.summat.places.entity.Places;
 import com.summat.summat.places.repository.PlacesRepository;
@@ -39,6 +40,7 @@ public class PlacesService {
         Places place = new Places();
         place.setPlaceName(placesReqDto.getPlaceName());
         place.setPlaceDetailAddress(placesReqDto.getPlaceDetailAddress());
+        place.setPlaceDescription(placesReqDto.getPlaceDescription());
         place.setPlaceImageUrl(imageUrl);
         place.setOneLineDesc(placesReqDto.getOneLineDesc());
         place.setPlaceType(placesReqDto.getPlaceType());
@@ -71,6 +73,7 @@ public class PlacesService {
         updatePlace.setPlaceName(placesReqDto.getPlaceName());
         updatePlace.setPlaceDetailAddress(placesReqDto.getPlaceDetailAddress());
         updatePlace.setOneLineDesc(placesReqDto.getOneLineDesc());
+        updatePlace.setPlaceDescription(placesReqDto.getPlaceDescription());
         updatePlace.setPlaceType(placesReqDto.getPlaceType());
         updatePlace.setPlaceRegion(placesReqDto.getPlaceRegion());
         updatePlace.setLikeCount(placesReqDto.getLikeCount());
@@ -110,5 +113,25 @@ public class PlacesService {
         } catch (IOException e) {
             throw new RuntimeException("이미지 저장 실패", e);
         }
+    }
+
+    public PlacesDetailResDto detailPlace(Long placeId) {
+
+        Optional<Places> detailPlace = placesRepository.findById(placeId);
+
+        PlacesDetailResDto changeDetailPlace = new PlacesDetailResDto();
+
+        changeDetailPlace.setPlaceName(detailPlace.get().getPlaceName());
+        changeDetailPlace.setPlaceDetailAddress(detailPlace.get().getPlaceDetailAddress());
+        changeDetailPlace.setOneLineDesc(detailPlace.get().getOneLineDesc());
+        changeDetailPlace.setPlaceDescription(detailPlace.get().getPlaceDescription());
+        changeDetailPlace.setPlaceType(detailPlace.get().getPlaceType());
+        changeDetailPlace.setPlaceRegion(detailPlace.get().getPlaceRegion());
+        changeDetailPlace.setLikeCount(detailPlace.get().getLikeCount());
+        changeDetailPlace.setViewCount(detailPlace.get().getViewCount());
+
+
+        return changeDetailPlace;
+
     }
 }
