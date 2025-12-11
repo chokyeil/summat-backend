@@ -8,6 +8,7 @@ import com.summat.summat.users.entity.Users;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.beans.factory.annotation.Value;
 
@@ -93,6 +94,38 @@ public class PlacesService {
         return true;
     }
 
+    public PlacesDetailResDto detailPlace(Long placeId) {
+
+        Optional<Places> detailPlace = placesRepository.findById(placeId);
+
+        PlacesDetailResDto changeDetailPlace = new PlacesDetailResDto();
+
+        changeDetailPlace.setPlaceName(detailPlace.get().getPlaceName());
+        changeDetailPlace.setPlaceDetailAddress(detailPlace.get().getPlaceDetailAddress());
+        changeDetailPlace.setOneLineDesc(detailPlace.get().getOneLineDesc());
+        changeDetailPlace.setPlaceDescription(detailPlace.get().getPlaceDescription());
+        changeDetailPlace.setPlaceType(detailPlace.get().getPlaceType());
+        changeDetailPlace.setPlaceRegion(detailPlace.get().getPlaceRegion());
+        changeDetailPlace.setLikeCount(detailPlace.get().getLikeCount());
+        changeDetailPlace.setViewCount(detailPlace.get().getViewCount());
+
+
+        return changeDetailPlace;
+
+    }
+
+
+    @Transactional
+    public Long increaseView(Long placeId) {
+        placesRepository.increaseViews(placeId);
+
+        Places place = placesRepository.findById(placeId).orElseThrow(() -> new IllegalArgumentException("not found place"));
+
+        return place.getViewCount();
+
+    }
+
+
     private String savePlaceImage(MultipartFile image) {
         log.info("savePlaceImage 진입!!");
         if (image == null || image.isEmpty()) {
@@ -115,23 +148,4 @@ public class PlacesService {
         }
     }
 
-    public PlacesDetailResDto detailPlace(Long placeId) {
-
-        Optional<Places> detailPlace = placesRepository.findById(placeId);
-
-        PlacesDetailResDto changeDetailPlace = new PlacesDetailResDto();
-
-        changeDetailPlace.setPlaceName(detailPlace.get().getPlaceName());
-        changeDetailPlace.setPlaceDetailAddress(detailPlace.get().getPlaceDetailAddress());
-        changeDetailPlace.setOneLineDesc(detailPlace.get().getOneLineDesc());
-        changeDetailPlace.setPlaceDescription(detailPlace.get().getPlaceDescription());
-        changeDetailPlace.setPlaceType(detailPlace.get().getPlaceType());
-        changeDetailPlace.setPlaceRegion(detailPlace.get().getPlaceRegion());
-        changeDetailPlace.setLikeCount(detailPlace.get().getLikeCount());
-        changeDetailPlace.setViewCount(detailPlace.get().getViewCount());
-
-
-        return changeDetailPlace;
-
-    }
 }
