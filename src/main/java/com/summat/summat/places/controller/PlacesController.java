@@ -110,4 +110,17 @@ public class PlacesController {
 
         return result;
     }
+
+    @PostMapping("/view/{placeId}")
+    public HashMap<String, Object> increaseView(@PathVariable(name = "placeId") Long placeId) {
+
+        Long updateViewCount = placesService.increaseView(placeId);
+        HashMap<String, Object> result = new HashMap<>();
+
+        result.put("status", updateViewCount != null ? 200 : 500);
+        result.put("message", updateViewCount != null ? "detail place sucess" : "detail place fail");
+        result.put("viewCount", updateViewCount);
+
+        return result;
+    }
 }
