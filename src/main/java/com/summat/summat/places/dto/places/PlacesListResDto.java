@@ -1,4 +1,4 @@
-package com.summat.summat.places.dto;
+package com.summat.summat.places.dto.places;
 
 import lombok.Data;
 import lombok.Getter;
