@@ -1,10 +1,13 @@
 package com.summat.summat.places.service;
 
-import com.summat.summat.places.dto.PlacesDetailResDto;
-import com.summat.summat.places.dto.PlacesReqDto;
+import com.summat.summat.places.dto.places.PlacesDetailResDto;
+import com.summat.summat.places.dto.places.PlacesReqDto;
+import com.summat.summat.places.entity.PlaceLike;
 import com.summat.summat.places.entity.Places;
+import com.summat.summat.places.repository.PlaceLikeRepository;
 import com.summat.summat.places.repository.PlacesRepository;
 import com.summat.summat.users.entity.Users;
+import com.summat.summat.users.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -27,8 +30,17 @@ public class PlacesService {
     @Value("${file.upload-dir}")
     private String uploadDir;
 
+    private final UsersRepository usersRepository;
     private final PlacesRepository placesRepository;
-    public boolean createdPlace(PlacesReqDto placesReqDto, MultipartFile image, Users user) {
+    private final PlaceLikeRepository placeLikeRepository;
+
+    public boolean createdPlace(PlacesReqDto placesReqDto, MultipartFile image, Long userId) {
+
+
+        Users user = usersRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("유저 없음"));
+
+
         log.info("placesReqDto.getPlaceName() = " + placesReqDto.getPlaceName());
         log.info("placesReqDto.getPlaceDetailAddress() = " + placesReqDto.getPlaceDetailAddress());
         if(placesReqDto.getPlaceName() == null || placesReqDto.getPlaceDetailAddress() == null) {
@@ -64,7 +76,10 @@ public class PlacesService {
         return listPlaces.size() > 0 ? listPlaces : null;
     }
 
-    public boolean updatePlace(PlacesReqDto placesReqDto, Users user, Long placeId) {
+    public boolean updatePlace(PlacesReqDto placesReqDto, Long userId, Long placeId) {
+        Users user = usersRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("유저 없음"));
+
         Optional<Places> findByPlace = placesRepository.findById(placeId);
 
         Places updatePlace = findByPlace.orElseThrow(null);
@@ -86,7 +101,10 @@ public class PlacesService {
         return true;
     }
 
-    public boolean removePlace(Long placeId) {
+    public boolean removePlace(Long userId, Long placeId) {
+        Users user = usersRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("유저 없음"));
+
         if(!placesRepository.existsById(placeId)) return false;
 
         placesRepository.deleteById(placeId);
@@ -148,4 +166,32 @@ public class PlacesService {
         }
     }
 
+    public boolean toggleLike(Long userId, Long placeId) {
+
+//        Users user = usersRepository.findById(userId)
+//                .orElseThrow(() -> new IllegalArgumentException("유저 없음"));
+//
+        Places place = placesRepository.findById(placeId)
+                .orElseThrow(() -> new IllegalArgumentException("장소 없음"));
+
+        Optional<PlaceLike> isPlaceLikeId = placeLikeRepository.findByUserIdAndPlaceId(userId, placeId);
+        boolean isPlaceLikeResult;
+
+
+        if(isPlaceLikeId.isPresent()) {
+            placeLikeRepository.delete(isPlaceLikeId.get());
+            place.setLikeCount(place.getLikeCount() - 1);
+            isPlaceLikeResult = false;
+        } else {
+            PlaceLike placeLike = new PlaceLike();
+            placeLike.setUserId(userId);
+            placeLike.setPlaceId(placeId);
+            place.setLikeCount(place.getLikeCount() + 1);
+            placeLikeRepository.save(placeLike);
+            isPlaceLikeResult = true;
+
+        }
+
+        return isPlaceLikeResult;
+    }
 }
