@@ -1,11 +1,11 @@
 package com.summat.summat.places.controller;
 
-import com.summat.summat.places.dto.PlacesDetailResDto;
-import com.summat.summat.places.dto.PlacesReqDto;
+import com.summat.summat.places.dto.places.PlacesDetailResDto;
+import com.summat.summat.places.dto.places.PlacesReqDto;
+import com.summat.summat.places.entity.PlaceLike;
 import com.summat.summat.places.entity.Places;
 import com.summat.summat.places.service.PlacesService;
 import com.summat.summat.users.CustomUserDetails;
-import com.summat.summat.users.entity.Users;
 import com.summat.summat.users.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,16 +31,13 @@ public class PlacesController {
                                                 @AuthenticationPrincipal CustomUserDetails userDetails) {
         log.info(">>> /places/add controller 진입!!!");
 
-            Long userId = userDetails.getUser().getId();
-            HashMap<String, Object> result = new HashMap<>();
-
-            Users user = usersRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("유저 없음"));
+        Long userId = userDetails.getUser().getId();
+        HashMap<String, Object> result = new HashMap<>();
 
         log.info("placesReqDto.getPlaceName() = " + placesReqDto.getPlaceName());
         log.info("placesReqDto.getPlaceDetailAddress() = " + placesReqDto.getPlaceDetailAddress());
 
-            boolean isCreated = placesService.createdPlace(placesReqDto, image, user);
+            boolean isCreated = placesService.createdPlace(placesReqDto, image, userId);
 
             result.put("status", isCreated ? 200 : 500);
             result.put("message", isCreated ? "sucess place create" : "fail place create");
@@ -69,10 +66,7 @@ public class PlacesController {
         Long userId = userDetails.getUser().getId();
         HashMap<String, Object> result = new HashMap<>();
 
-        Users user = usersRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("유저 없음"));
-
-        boolean isUpdate = placesService.updatePlace(placesReqDto, user, placeId);
+        boolean isUpdate = placesService.updatePlace(placesReqDto, userId, placeId);
 
         result.put("status", isUpdate ? 200 : 500);
         result.put("message", isUpdate ? "sucess place update" : "fail place update");
@@ -86,10 +80,7 @@ public class PlacesController {
         Long userId = userDetails.getUser().getId();
         HashMap<String, Object> result = new HashMap<>();
 
-        Users user = usersRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("유저 없음"));
-
-        boolean isRemove = placesService.removePlace(placeId);
+        boolean isRemove = placesService.removePlace(userId, placeId);
 
         result.put("status", isRemove ? 200 : 500);
         result.put("message", isRemove ? "sucess place remove" : "fail place remove");
@@ -123,4 +114,21 @@ public class PlacesController {
 
         return result;
     }
+
+    @PostMapping("/like/{placeId}")
+    public HashMap<String, Object> toggleLike(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                              @PathVariable(name = "placeId") Long placeId) {
+        Long userId = userDetails.getUser().getId();
+
+        boolean isPlaceLike = placesService.toggleLike(userId, placeId);
+
+        HashMap<String, Object> result = new HashMap<>();
+
+        result.put("message", isPlaceLike ? "like select" : "like cancle");
+        result.put("isLike", isPlaceLike);
+
+        return result;
+    }
+
+
 }
