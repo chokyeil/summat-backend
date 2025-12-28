@@ -1,4 +1,4 @@
-package com.summat.summat.users.dto;
+package com.summat.summat.users.dto.users;
 
 import lombok.Getter;
 import lombok.Setter;

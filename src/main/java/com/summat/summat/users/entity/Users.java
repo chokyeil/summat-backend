@@ -20,20 +20,20 @@ public class Users {
     @Id
     @GeneratedValue
     @Column(name = "users_id")
-    Long id;
+    private Long id;
 
     @Column(name = "id", nullable = false, length = 100)
     @NotNull
-    String userId;
+    private String userId;
 
     @Column(name = "password", nullable = false, length = 100)
     @JsonIgnore
     @NotNull
-    String userPw;
+    private String userPw;
 
     @Column(name = "nickName", nullable = false, length = 40)
     @NotNull
-    String userNickName;
+    private String userNickName;
 
     @Column(nullable = false, length = 20)
     @NotNull

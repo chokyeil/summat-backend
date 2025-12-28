@@ -1,16 +1,15 @@
 package com.summat.summat.users.service;
 
 import com.summat.summat.enums.RoleType;
-import com.summat.summat.users.dto.UsersReqDto;
+import com.summat.summat.users.CustomUserDetails;
+import com.summat.summat.users.dto.users.PasswordCheckReqDto;
+import com.summat.summat.users.dto.users.UsersReqDto;
 import com.summat.summat.users.entity.Users;
 import com.summat.summat.users.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.util.HashMap;
-import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -33,5 +32,19 @@ public class UsersService {
 
             usersRepository.save(user);
             return true;
+    }
+
+
+    public boolean checkCurrentPassword(CustomUserDetails userDetails, PasswordCheckReqDto passwordCheckReqDto) {
+        String currentPassword = passwordCheckReqDto.getCurrentPassword();
+        Long userId = userDetails.getUser().getId();
+
+        Users user = usersRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("유저 없음"));
+
+
+        return passwordEncoder.matches(currentPassword, user.getUserPw());
+
+
     }
 }
