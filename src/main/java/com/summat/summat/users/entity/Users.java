@@ -3,7 +3,6 @@ package com.summat.summat.users.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.summat.summat.enums.RoleType;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
@@ -22,21 +21,17 @@ public class Users {
     @Column(name = "users_id")
     private Long id;
 
-    @Column(name = "id", nullable = false, length = 100)
-    @NotNull
+    @Column(name = "id", nullable = false, length = 20)
     private String userId;
 
-    @Column(name = "password", nullable = false, length = 100)
+    @Column(name = "password", nullable = false, length = 20)
     @JsonIgnore
-    @NotNull
     private String userPw;
 
-    @Column(name = "nickName", nullable = false, length = 40)
-    @NotNull
+    @Column(name = "nickName", nullable = false, length = 8)
     private String userNickName;
 
-    @Column(nullable = false, length = 20)
-    @NotNull
+    @Column(nullable = false, length = 15)
     @Enumerated(EnumType.STRING)
     private RoleType role = RoleType.ROLE_USER;
 
