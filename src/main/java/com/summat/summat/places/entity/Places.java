@@ -26,9 +26,13 @@ public class Places {
     @Column(name = "place_name")
     private String placeName;
 
-    // 가게 상세 주소
-    @Column(name ="place_detail_address")
-    private String placeDetailAddress;
+    // 가게 지번 주소
+    @Column(name ="place_lot_address")
+    private String placeLotAddress;
+
+    // 가게 도로명 주소
+    @Column(name ="place_road_address")
+    private String placeRoadAddress;
 
     // 가게 설명
     @Column(name = "place_description")
