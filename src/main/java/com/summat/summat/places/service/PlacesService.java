@@ -42,8 +42,9 @@ public class PlacesService {
 
 
         log.info("placesReqDto.getPlaceName() = " + placesReqDto.getPlaceName());
-        log.info("placesReqDto.getPlaceDetailAddress() = " + placesReqDto.getPlaceDetailAddress());
-        if(placesReqDto.getPlaceName() == null || placesReqDto.getPlaceDetailAddress() == null) {
+        log.info("placesReqDto.getPlaceLotAddress() = " + placesReqDto.getPlaceLotAddress());
+        log.info("placesReqDto.getPlaceRoadAddress() = " + placesReqDto.getPlaceRoadAddress());
+        if(placesReqDto.getPlaceName() == null || placesReqDto.getPlaceLotAddress() == null || placesReqDto.getPlaceRoadAddress() == null) {
             log.info("여기로 빠지니???!!!");
             return false;
         }
@@ -52,14 +53,15 @@ public class PlacesService {
 
         Places place = new Places();
         place.setPlaceName(placesReqDto.getPlaceName());
-        place.setPlaceDetailAddress(placesReqDto.getPlaceDetailAddress());
+        place.setPlaceLotAddress(placesReqDto.getPlaceLotAddress());
+        place.setPlaceRoadAddress(placesReqDto.getPlaceRoadAddress());
         place.setPlaceDescription(placesReqDto.getPlaceDescription());
         place.setPlaceImageUrl(imageUrl);
         place.setOneLineDesc(placesReqDto.getOneLineDesc());
         place.setPlaceType(placesReqDto.getPlaceType());
         place.setPlaceRegion(placesReqDto.getPlaceRegion());
-        place.setLikeCount(placesReqDto.getLikeCount());
-        place.setViewCount(placesReqDto.getViewCount());
+        place.setLikeCount(0);
+        place.setViewCount(0);
         place.setUsers(user);
 
         placesRepository.save(place);
@@ -76,7 +78,7 @@ public class PlacesService {
         return listPlaces.size() > 0 ? listPlaces : null;
     }
 
-    public boolean updatePlace(PlacesReqDto placesReqDto, Long userId, Long placeId) {
+    public boolean updatePlace(PlacesReqDto placesReqDto, MultipartFile image, Long userId, Long placeId) {
         Users user = usersRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("유저 없음"));
 
@@ -86,14 +88,18 @@ public class PlacesService {
 
         if(updatePlace == null) return false;
 
+        String imageUrl = savePlaceImage(image);
+
         updatePlace.setPlaceName(placesReqDto.getPlaceName());
-        updatePlace.setPlaceDetailAddress(placesReqDto.getPlaceDetailAddress());
-        updatePlace.setOneLineDesc(placesReqDto.getOneLineDesc());
+        updatePlace.setPlaceLotAddress(placesReqDto.getPlaceLotAddress());
+        updatePlace.setPlaceRoadAddress(placesReqDto.getPlaceRoadAddress());
         updatePlace.setPlaceDescription(placesReqDto.getPlaceDescription());
+        updatePlace.setPlaceImageUrl(imageUrl);
+        updatePlace.setOneLineDesc(placesReqDto.getOneLineDesc());
         updatePlace.setPlaceType(placesReqDto.getPlaceType());
         updatePlace.setPlaceRegion(placesReqDto.getPlaceRegion());
-        updatePlace.setLikeCount(placesReqDto.getLikeCount());
-        updatePlace.setViewCount(placesReqDto.getViewCount());
+        updatePlace.setLikeCount(findByPlace.get().getLikeCount());
+        updatePlace.setViewCount(findByPlace.get().getViewCount());
         updatePlace.setUsers(user);
 
         placesRepository.save(updatePlace);
@@ -119,14 +125,14 @@ public class PlacesService {
         PlacesDetailResDto changeDetailPlace = new PlacesDetailResDto();
 
         changeDetailPlace.setPlaceName(detailPlace.get().getPlaceName());
-        changeDetailPlace.setPlaceDetailAddress(detailPlace.get().getPlaceDetailAddress());
+        changeDetailPlace.setPlaceLotAddress(detailPlace.get().getPlaceLotAddress());
+        changeDetailPlace.setPlaceRoadAddress(detailPlace.get().getPlaceRoadAddress());
         changeDetailPlace.setOneLineDesc(detailPlace.get().getOneLineDesc());
         changeDetailPlace.setPlaceDescription(detailPlace.get().getPlaceDescription());
         changeDetailPlace.setPlaceType(detailPlace.get().getPlaceType());
         changeDetailPlace.setPlaceRegion(detailPlace.get().getPlaceRegion());
         changeDetailPlace.setLikeCount(detailPlace.get().getLikeCount());
         changeDetailPlace.setViewCount(detailPlace.get().getViewCount());
-
 
         return changeDetailPlace;
 
