@@ -43,11 +43,12 @@ public class SecurityConfig {
                         // 인증 없이 접근 허용
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/summatUsers/signup").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/summatUsers/pw-check").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/summatUsers/nick-name-check/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/places/list").permitAll()
                         .requestMatchers(HttpMethod.GET, "/places/detail/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/places/view/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/places/like/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/mypage/**").permitAll()
                         // 정적 리소스 등도 필요하면 여기 permitAll
                         // .requestMatchers("/", "/index.html", "/static/**").permitAll()
                         // 나머지는 인증 필요
