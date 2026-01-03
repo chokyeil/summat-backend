@@ -35,7 +35,7 @@ public class PlacesController {
         HashMap<String, Object> result = new HashMap<>();
 
         log.info("placesReqDto.getPlaceName() = " + placesReqDto.getPlaceName());
-        log.info("placesReqDto.getPlaceDetailAddress() = " + placesReqDto.getPlaceDetailAddress());
+        log.info("placesReqDto.getPlaceLotAddress() = " + placesReqDto.getPlaceLotAddress());
 
             boolean isCreated = placesService.createdPlace(placesReqDto, image, userId);
 
@@ -61,12 +61,13 @@ public class PlacesController {
 
     @PutMapping("/update/{placeId}")
     public HashMap<String, Object> updatePlace(@RequestBody PlacesReqDto placesReqDto,
-                                                @AuthenticationPrincipal CustomUserDetails userDetails,
+                                               @AuthenticationPrincipal CustomUserDetails userDetails,
+                                               @RequestPart(value = "image", required = false) MultipartFile image,
                                                @PathVariable(name = "placeId") Long placeId) {
         Long userId = userDetails.getUser().getId();
         HashMap<String, Object> result = new HashMap<>();
 
-        boolean isUpdate = placesService.updatePlace(placesReqDto, userId, placeId);
+        boolean isUpdate = placesService.updatePlace(placesReqDto, image, userId, placeId);
 
         result.put("status", isUpdate ? 200 : 500);
         result.put("message", isUpdate ? "sucess place update" : "fail place update");
