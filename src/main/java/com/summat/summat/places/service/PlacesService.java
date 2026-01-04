@@ -1,5 +1,6 @@
 package com.summat.summat.places.service;
 
+import com.summat.summat.enums.PlaceTagType;
 import com.summat.summat.places.dto.places.PlacesDetailResDto;
 import com.summat.summat.places.dto.places.PlacesReqDto;
 import com.summat.summat.places.entity.PlaceLike;
@@ -199,5 +200,13 @@ public class PlacesService {
         }
 
         return isPlaceLikeResult;
+    }
+
+    public List<Places> searchSummatList(String region, String type, List<String> tags) {
+
+        PlaceTagType typeEnum = (type == null || type.isBlank()) ? null : PlaceTagType.fromCode(type);
+
+
+        return null;
     }
 }

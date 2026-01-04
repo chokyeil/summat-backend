@@ -11,6 +11,8 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Setter
@@ -55,8 +57,11 @@ public class Places {
     private String placeRegion;
 
     // 태그(WIFI//콘센트/주차가능/반려동물동반/키즈존/감성카페/북카페/작업하기좋은/조용한카페/브런치/빵집/디저트맛집/뷰맛집/포토존/테라스
-    @Column(name = "tag")
-    private String tag;
+//    @Column(name = "tag")
+//    @Enumerated(EnumType.STRING)
+//    private String tag;
+    @OneToMany(mappedBy = "place", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PlaceTag> placeTags = new ArrayList<>();
 
     // 좋아요 갯수
     @Column(name = "like_count")

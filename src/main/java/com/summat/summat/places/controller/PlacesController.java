@@ -131,5 +131,17 @@ public class PlacesController {
         return result;
     }
 
+    @GetMapping("/search")
+    public HashMap<String, Object> searchSummatList(@RequestParam(name = "region", required = false) String region,
+                                                    @RequestParam(name = "type", required = false) String type,
+                                                    @RequestParam(name = "tags", required = false) List<String> tags) {
+
+
+        List<Places> searchResult = placesService.searchSummatList(region, type, tags);
+
+
+        return null;
+    }
+
 
 }
