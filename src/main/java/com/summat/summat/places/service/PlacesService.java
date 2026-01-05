@@ -1,9 +1,11 @@
 package com.summat.summat.places.service;
 
 import com.summat.summat.enums.PlaceTagType;
+import com.summat.summat.places.dto.places.PlaceMainListResDto;
 import com.summat.summat.places.dto.places.PlacesDetailResDto;
 import com.summat.summat.places.dto.places.PlacesReqDto;
 import com.summat.summat.places.entity.PlaceLike;
+import com.summat.summat.places.entity.PlaceTag;
 import com.summat.summat.places.entity.Places;
 import com.summat.summat.places.repository.PlaceLikeRepository;
 import com.summat.summat.places.repository.PlacesRepository;
@@ -20,6 +22,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -59,11 +62,23 @@ public class PlacesService {
         place.setPlaceDescription(placesReqDto.getPlaceDescription());
         place.setPlaceImageUrl(imageUrl);
         place.setOneLineDesc(placesReqDto.getOneLineDesc());
-        place.setPlaceType(placesReqDto.getPlaceType());
+//        place.setPlaceType(placesReqDto.getPlaceType());
         place.setPlaceRegion(placesReqDto.getPlaceRegion());
         place.setLikeCount(0);
         place.setViewCount(0);
         place.setUsers(user);
+
+
+
+        for(String str : placesReqDto.getTags()) {
+            PlaceTagType tagType = PlaceTagType.fromCode(str);
+
+            PlaceTag placeTag = new PlaceTag();
+            placeTag.setPlace(place);
+            placeTag.setTagType(tagType);
+
+            place.getPlaceTags().add(placeTag);
+        }
 
         placesRepository.save(place);
 
@@ -202,11 +217,32 @@ public class PlacesService {
         return isPlaceLikeResult;
     }
 
-    public List<Places> searchSummatList(String region, String type, List<String> tags) {
+    public List<PlaceMainListResDto> searchSummatList(String query, String region, String type, List<String> tags) {
 
-        PlaceTagType typeEnum = (type == null || type.isBlank()) ? null : PlaceTagType.fromCode(type);
+        List<Places> places = placesRepository.findAll();
+        List<PlaceMainListResDto> result = new ArrayList<>();
+
+        for (Places p : places) {
+
+            List<PlaceTagType> tagTypes = new ArrayList<>();
+            for (PlaceTag pt : p.getPlaceTags()) {
+                tagTypes.add(pt.getTagType());
+            }
+
+            result.add(new PlaceMainListResDto(
+                    p.getId(),
+                    p.getPlaceName(),
+                    p.getPlaceRegion(),
+                    p.getPlaceType(),
+                    p.getPlaceImageUrl(),
+                    tagTypes,
+                    p.getLikeCount(),
+                    p.getViewCount()
+            ));
+        }
 
 
-        return null;
+
+        return result;
     }
 }

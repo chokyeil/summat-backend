@@ -1,9 +1,11 @@
 package com.summat.summat.places.dto.places;
 
- import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
+
+ import java.util.List;
 
 @Getter
 @Setter
@@ -31,10 +33,13 @@ public class PlacesReqDto {
     private String placeDescription;
 
     // 업종 (카페/식당/빵집 등)
-    @NotBlank(message = "업종은 필수입니다.")
+//    @NotBlank(message = "업종은 필수입니다.")
     private String placeType;
 
     // 지역 (서울/부산 등)
-    @NotBlank(message = "지역은 필수입니다.")
+//    @NotBlank(message = "지역은 필수입니다.")
     private String placeRegion;
+
+    private List<String> tags;
+
 }

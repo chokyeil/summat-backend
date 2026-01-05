@@ -1,5 +1,6 @@
 package com.summat.summat.places.controller;
 
+import com.summat.summat.places.dto.places.PlaceMainListResDto;
 import com.summat.summat.places.dto.places.PlacesDetailResDto;
 import com.summat.summat.places.dto.places.PlacesReqDto;
 import com.summat.summat.places.entity.PlaceLike;
@@ -132,15 +133,21 @@ public class PlacesController {
     }
 
     @GetMapping("/search")
-    public HashMap<String, Object> searchSummatList(@RequestParam(name = "region", required = false) String region,
+    public HashMap<String, Object> searchSummatList(@RequestParam(name = "q", required = false) String query,
+                                                    @RequestParam(name = "region", required = false) String region,
                                                     @RequestParam(name = "type", required = false) String type,
                                                     @RequestParam(name = "tags", required = false) List<String> tags) {
 
 
-        List<Places> searchResult = placesService.searchSummatList(region, type, tags);
+        List<PlaceMainListResDto> searchResult = placesService.searchSummatList(query, region, type, tags);
 
+        HashMap<String, Object> result = new HashMap<>();
 
-        return null;
+        result.put("status", searchResult != null ? 200 : 500);
+        result.put("message", searchResult != null ? "place main list search sucess" : "place main list search fail");
+        result.put("data", searchResult);
+
+        return result;
     }
 
 
