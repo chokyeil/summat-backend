@@ -1,5 +1,7 @@
 package com.summat.summat.users.controller;
 
+import com.summat.summat.common.response.ApiResponse;
+import com.summat.summat.common.response.ResponseCode;
 import com.summat.summat.users.CustomUserDetails;
 import com.summat.summat.users.dto.users.PasswordCheckReqDto;
 import com.summat.summat.users.dto.users.UsersReqDto;
@@ -7,6 +9,8 @@ import com.summat.summat.users.service.UsersService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,19 +24,17 @@ public class UsersController {
     private final UsersService usersService;
 
     @PostMapping("/signup")
-    public HashMap<String, Object> signUp(@RequestBody @Valid UsersReqDto usersReqDto) {
+    public ResponseEntity<ApiResponse> signUp(@RequestBody @Valid UsersReqDto usersReqDto) {
         log.info("UsersController signUp userId = " + usersReqDto.getUserId());
         log.info("UsersController signUp userPw = " + usersReqDto.getUserPw());
         log.info("UsersController signUp userNickName = " + usersReqDto.getUserNickName());
 
         boolean saveResult = usersService.signUp(usersReqDto);
         log.info("UsersController signUp saveResult = " + saveResult);
-        HashMap<String, Object> signUpResponse = new HashMap<>();
 
-        signUpResponse.put("status", saveResult ? 200 : 500);
-        signUpResponse.put("messagw", saveResult ? "회원가입 완료 했습니다." : "회원가입 실패 했습니다.");
-
-        return signUpResponse;
+        return ResponseEntity
+                .status(saveResult ? ResponseCode.SIGNUP_SUCCESS.getHttpStatus() : ResponseCode.SIGNUP_FAIL.getHttpStatus())
+                .body(saveResult ? new ApiResponse<>(ResponseCode.SIGNUP_SUCCESS, null) : new ApiResponse<>(ResponseCode.SIGNUP_FAIL, null));
     }
 
     @PostMapping("/pw-check")
