@@ -52,6 +52,10 @@ public class UsersService {
     }
 
     public boolean checkCurrentNickName(String checkNickName) {
-        return usersRepository.findByUserNickName(checkNickName);
+        return usersRepository.existsByUserNickName(checkNickName);
+    }
+
+    public boolean checkCurrentUserId(String userId) {
+        return usersRepository.existsByUserId(userId);
     }
 }
