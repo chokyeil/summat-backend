@@ -25,15 +25,15 @@ public class Places {
     private Long id;
 
     // 가게 이름
-    @Column(name = "place_name")
+    @Column(name = "place_name", nullable = false, unique = true)
     private String placeName;
 
     // 가게 지번 주소
-    @Column(name ="place_lot_address")
+    @Column(name ="place_lot_address", nullable = false, unique = true)
     private String placeLotAddress;
 
     // 가게 도로명 주소
-    @Column(name ="place_road_address")
+    @Column(name ="place_road_address", nullable = false, unique = true)
     private String placeRoadAddress;
 
     // 가게 설명
@@ -64,11 +64,11 @@ public class Places {
     private List<PlaceTag> placeTags = new ArrayList<>();
 
     // 좋아요 갯수
-    @Column(name = "like_count")
+    @Column(name = "like_count", nullable = false)
     private long likeCount;
 
     // 조회수 갯수
-    @Column(name = "view_count")
+    @Column(name = "view_count", nullable = false)
     private long viewCount;
 
     @CreatedDate
