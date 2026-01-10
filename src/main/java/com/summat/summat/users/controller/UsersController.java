@@ -16,12 +16,22 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 
+
 @RestController
 @RequestMapping("/summatUsers")
 @RequiredArgsConstructor
 @Slf4j
 public class UsersController {
     private final UsersService usersService;
+
+    @GetMapping("/id-check")
+    public ResponseEntity<ApiResponse> checkCurrentUserId(@RequestParam String userId) {
+        boolean isUserId = usersService.checkCurrentUserId(userId);
+
+        return ResponseEntity.status(!isUserId ? ResponseCode.USERID_AVAILABLE.getHttpStatus() : ResponseCode.USERID_DUPLICATED.getHttpStatus())
+                .body(!isUserId ? new ApiResponse(ResponseCode.USERID_AVAILABLE, null) : new ApiResponse(ResponseCode.USERID_DUPLICATED, null));
+    }
+
 
     @PostMapping("/signup")
     public ResponseEntity<ApiResponse> signUp(@RequestBody @Valid UsersReqDto usersReqDto) {
@@ -38,29 +48,20 @@ public class UsersController {
     }
 
     @PostMapping("/pw-check")
-    public HashMap<String, Object> checkCurrentPassword(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                           @RequestBody PasswordCheckReqDto passwordCheckReqDto) {
+    public ResponseEntity<ApiResponse> checkCurrentPassword(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                            @RequestBody PasswordCheckReqDto passwordCheckReqDto) {
 
         boolean isCurrentPassword = usersService.checkCurrentPassword(userDetails, passwordCheckReqDto);
-        HashMap<String, Object> result = new HashMap<>();
 
-        result.put("status", isCurrentPassword ? 200 : 500);
-        result.put("message", isCurrentPassword ? "true current password" : "false current password");
-        result.put("data", isCurrentPassword);
-
-        return result;
+        return ResponseEntity.status(isCurrentPassword ? ResponseCode.SIGNUP_SUCCESS.getHttpStatus() : ResponseCode.PASSWORD_MISMATCH.getHttpStatus())
+                .body(isCurrentPassword ? new ApiResponse<>(ResponseCode.PASSWORD_MATCHED, null) : new ApiResponse(ResponseCode.PASSWORD_MISMATCH, null));
     }
 
-    @GetMapping("/nick-name-check/{nickname}")
-    public HashMap<String, Object> checkCurrentNickName(@PathVariable String checkNickName) {
-        Boolean isNickName = usersService.checkCurrentNickName(checkNickName);
+    @GetMapping("/nick-name-check")
+    public ResponseEntity<ApiResponse> checkCurrentNickName(@RequestParam String checkNickName) {
+        boolean isNickName = usersService.checkCurrentNickName(checkNickName);
 
-        HashMap<String, Object> result = new HashMap<>();
-
-        result.put("status", isNickName ? 200 : 500);
-        result.put("message", isNickName ? "found nick name" : "not found nick name");
-        result.put("data", isNickName);
-
-        return result;
+        return ResponseEntity.status(!isNickName ? ResponseCode.NICKNAME_AVAILABLE.getHttpStatus() : ResponseCode.NICKNAME_DUPLICATED.getHttpStatus())
+                .body(!isNickName ? new ApiResponse(ResponseCode.NICKNAME_AVAILABLE, null) : new ApiResponse(ResponseCode.NICKNAME_DUPLICATED, null));
     }
 }
