@@ -21,14 +21,14 @@ public class Users {
     @Column(name = "users_id")
     private Long id;
 
-    @Column(name = "id", nullable = false, length = 20)
+    @Column(name = "id", nullable = false, length = 20, unique = true)
     private String userId;
 
     @Column(name = "password", nullable = false, length = 100)
     @JsonIgnore
     private String userPw;
 
-    @Column(name = "nickName", nullable = false, length = 8)
+    @Column(name = "nickName", nullable = false, length = 8, unique = true)
     private String userNickName;
 
     @Column(nullable = false, length = 15)
