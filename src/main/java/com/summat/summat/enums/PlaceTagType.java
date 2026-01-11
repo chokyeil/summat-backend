@@ -1,5 +1,6 @@
 package com.summat.summat.enums;
 
+import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Getter;
 
 @Getter
@@ -38,5 +39,10 @@ public enum PlaceTagType {
             }
         }
         throw new IllegalArgumentException("Invalid tag code: " + code);
+    }
+
+    @JsonValue
+    public String jsonValue() {
+        return code; // "wifi"
     }
 }
