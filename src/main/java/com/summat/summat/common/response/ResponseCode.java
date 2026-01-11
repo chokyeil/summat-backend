@@ -16,7 +16,15 @@ public enum ResponseCode {
     NICKNAME_AVAILABLE(200, HttpStatus.OK, "사용 가능한 닉네임 입니다."),
     NICKNAME_DUPLICATED(409, HttpStatus.CONFLICT, "사용 중인 닉네임 입니다."),
     PLACE_CREATED(201, HttpStatus.CREATED, "숨맛 장소 생성 완료 했습니다."),
-    PLACE_CREATE_FAILED(400, HttpStatus.BAD_REQUEST, "숨맛 장소 생성 실패 했습니다.");
+    PLACE_CREATE_FAILED(400, HttpStatus.BAD_REQUEST, "숨맛 장소 생성 실패 했습니다."),
+    PLACE_LIST_SUCCESS(200, HttpStatus.OK, "장소 목록 조회 성공 했습니다."),
+    PLACE_UPDATED(200, HttpStatus.OK, "장소 정보가 수정되었습니다."),
+    PLACE_DELETED(200, HttpStatus.OK, "장소 정보가 삭제되었습니다."),
+    PLACE_DETAIL_SUCCESS(200, HttpStatus.OK, "장소 상세 조회 성공"),
+    PLACE_VIEW_INCREMENTED(200, HttpStatus.OK, "조회수가 증가되었습니다."),
+    PLACE_LIKE_SUCCESS(200, HttpStatus.OK, "좋아요를 눌렀습니다."),
+    PLACE_ALREADY_LIKED(409, HttpStatus.CONFLICT, "이미 좋아요한 장소입니다."),
+    PLACE_NOT_FOUND(404, HttpStatus.NOT_FOUND, "장소를 찾을 수 없습니다.");
 
     private final int code;
     private final HttpStatus httpStatus;
