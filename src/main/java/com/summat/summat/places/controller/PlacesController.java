@@ -1,5 +1,7 @@
 package com.summat.summat.places.controller;
 
+import com.summat.summat.common.response.ApiResponse;
+import com.summat.summat.common.response.ResponseCode;
 import com.summat.summat.places.dto.places.PlaceMainListResDto;
 import com.summat.summat.places.dto.places.PlacesDetailResDto;
 import com.summat.summat.places.dto.places.PlacesReqDto;
@@ -8,9 +10,12 @@ import com.summat.summat.places.entity.Places;
 import com.summat.summat.places.service.PlacesService;
 import com.summat.summat.users.CustomUserDetails;
 import com.summat.summat.users.repository.UsersRepository;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -27,113 +32,93 @@ public class PlacesController {
     private final UsersRepository usersRepository;
 
     @PostMapping(value = "/add", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public HashMap<String, Object> createdPlace(@ModelAttribute PlacesReqDto placesReqDto,
-                                                @RequestPart(value = "image", required = false) MultipartFile image,
-                                                @AuthenticationPrincipal CustomUserDetails userDetails) {
+    public ResponseEntity<ApiResponse> createdPlace(@ModelAttribute @Valid PlacesReqDto placesReqDto,
+                                                    @RequestPart(value = "image", required = false) MultipartFile image,
+                                                    @AuthenticationPrincipal CustomUserDetails userDetails) {
         log.info(">>> /places/add controller 진입!!!");
 
         Long userId = userDetails.getUser().getId();
-        HashMap<String, Object> result = new HashMap<>();
+
 
         log.info("placesReqDto.getPlaceName() = " + placesReqDto.getPlaceName());
         log.info("placesReqDto.getPlaceLotAddress() = " + placesReqDto.getPlaceLotAddress());
 
-            boolean isCreated = placesService.createdPlace(placesReqDto, image, userId);
+        boolean isCreated = placesService.createdPlace(placesReqDto, image, userId);
 
-            result.put("status", isCreated ? 200 : 500);
-            result.put("message", isCreated ? "sucess place create" : "fail place create");
-
-        return result;
+        return ResponseEntity.status(isCreated ? ResponseCode.PLACE_CREATED.getHttpStatus() : ResponseCode.PLACE_CREATE_FAILED.getHttpStatus())
+                             .body(isCreated ? new ApiResponse(ResponseCode.PLACE_CREATED, null) : new ApiResponse(ResponseCode.PLACE_CREATE_FAILED, null));
     }
 
     @GetMapping("/list")
-    public HashMap<String, Object> boardList() {
+    public ResponseEntity<ApiResponse> boardList(@RequestParam(defaultValue = "0") int page,
+                                             @RequestParam(defaultValue = "10") int size) {
 
-        HashMap<String, Object> result = new HashMap<>();
 
-        List<Places> resultData = placesService.getPlacesList();
 
-        result.put("status", resultData != null ? 200 : 500);
-        result.put("message", resultData != null ? "sucess place list" : "fail place list");
-        result.put("data", resultData);
+        List<PlaceMainListResDto> resultData = placesService.getPlacesList(page, size);
 
-        return result;
+
+        return ResponseEntity.status(ResponseCode.PLACE_LIST_SUCCESS.getHttpStatus())
+                             .body(new ApiResponse(ResponseCode.PLACE_LIST_SUCCESS, resultData));
     }
 
     @PutMapping("/update/{placeId}")
-    public HashMap<String, Object> updatePlace(@RequestBody PlacesReqDto placesReqDto,
+    public ResponseEntity<ApiResponse> updatePlace(@RequestBody PlacesReqDto placesReqDto,
                                                @AuthenticationPrincipal CustomUserDetails userDetails,
                                                @RequestPart(value = "image", required = false) MultipartFile image,
                                                @PathVariable(name = "placeId") Long placeId) {
         Long userId = userDetails.getUser().getId();
-        HashMap<String, Object> result = new HashMap<>();
 
         boolean isUpdate = placesService.updatePlace(placesReqDto, image, userId, placeId);
 
-        result.put("status", isUpdate ? 200 : 500);
-        result.put("message", isUpdate ? "sucess place update" : "fail place update");
-
-        return result;
+        return ResponseEntity.status(isUpdate ? ResponseCode.PLACE_UPDATED.getHttpStatus() : ResponseCode.PLACE_NOT_FOUND.getHttpStatus())
+                .body(isUpdate ? new ApiResponse(ResponseCode.PLACE_UPDATED, null) : new ApiResponse(ResponseCode.PLACE_NOT_FOUND, null));
     }
 
     @DeleteMapping("/remove/{placeId}")
-    public HashMap<String, Object> removePlace(@AuthenticationPrincipal CustomUserDetails userDetails,
+    public ResponseEntity<ApiResponse> removePlace(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                @PathVariable(name = "placeId") Long placeId) {
         Long userId = userDetails.getUser().getId();
-        HashMap<String, Object> result = new HashMap<>();
 
         boolean isRemove = placesService.removePlace(userId, placeId);
 
-        result.put("status", isRemove ? 200 : 500);
-        result.put("message", isRemove ? "sucess place remove" : "fail place remove");
 
-        return result;
+        return ResponseEntity.status(isRemove ? ResponseCode.PLACE_DELETED.getHttpStatus() : ResponseCode.PLACE_NOT_FOUND.getHttpStatus())
+                .body(isRemove ? new ApiResponse(ResponseCode.PLACE_DELETED, null) : new ApiResponse(ResponseCode.PLACE_NOT_FOUND, null));
     }
 
     @GetMapping("/detail/{placeId}")
-    public HashMap<String, Object> detailPlace(@PathVariable(name = "placeId") Long placeId) {
+    public ResponseEntity<ApiResponse> detailPlace(@PathVariable(name = "placeId") Long placeId) {
 
-        HashMap<String, Object> result = new HashMap<>();
 
         PlacesDetailResDto detailPlaceResult = placesService.detailPlace(placeId);
 
-        result.put("status", detailPlaceResult != null ? 200 : 500);
-        result.put("message", detailPlaceResult != null ? "detail place sucess" : "detail place fail");
-        result.put("data", detailPlaceResult);
-
-        return result;
+        return ResponseEntity.status(detailPlaceResult != null ? ResponseCode.PLACE_DETAIL_SUCCESS.getHttpStatus() : ResponseCode.PLACE_NOT_FOUND.getHttpStatus())
+                .body(detailPlaceResult != null ? new ApiResponse(ResponseCode.PLACE_DETAIL_SUCCESS, null) : new ApiResponse(ResponseCode.PLACE_NOT_FOUND, null));
     }
 
     @PostMapping("/view/{placeId}")
-    public HashMap<String, Object> increaseView(@PathVariable(name = "placeId") Long placeId) {
+    public ResponseEntity<ApiResponse> increaseView(@PathVariable(name = "placeId") Long placeId) {
 
-        Long updateViewCount = placesService.increaseView(placeId);
-        HashMap<String, Object> result = new HashMap<>();
+        boolean isCreaseView = placesService.increaseView(placeId);
 
-        result.put("status", updateViewCount != null ? 200 : 500);
-        result.put("message", updateViewCount != null ? "detail place sucess" : "detail place fail");
-        result.put("viewCount", updateViewCount);
-
-        return result;
+        return ResponseEntity.status(isCreaseView ? ResponseCode.PLACE_VIEW_INCREMENTED.getHttpStatus() : ResponseCode.PLACE_NOT_FOUND.getHttpStatus())
+                .body(isCreaseView ? new ApiResponse(ResponseCode.PLACE_DETAIL_SUCCESS, null) : new ApiResponse(ResponseCode.PLACE_NOT_FOUND, null));
     }
 
     @PostMapping("/like/{placeId}")
-    public HashMap<String, Object> toggleLike(@AuthenticationPrincipal CustomUserDetails userDetails,
+    public ResponseEntity<ApiResponse> toggleLike(@AuthenticationPrincipal CustomUserDetails userDetails,
                                               @PathVariable(name = "placeId") Long placeId) {
         Long userId = userDetails.getUser().getId();
 
         boolean isPlaceLike = placesService.toggleLike(userId, placeId);
 
-        HashMap<String, Object> result = new HashMap<>();
-
-        result.put("message", isPlaceLike ? "like select" : "like cancle");
-        result.put("isLike", isPlaceLike);
-
-        return result;
+        return ResponseEntity.status(isPlaceLike ? ResponseCode.PLACE_LIKE_SUCCESS.getHttpStatus() : ResponseCode.PLACE_NOT_FOUND.getHttpStatus())
+                .body(isPlaceLike ? new ApiResponse(ResponseCode.PLACE_LIKE_SUCCESS, null) : new ApiResponse(ResponseCode.PLACE_NOT_FOUND, null));
     }
 
     @GetMapping("/search")
-    public HashMap<String, Object> searchSummatList(@RequestParam(name = "q", required = false) String query,
+    public ResponseEntity<ApiResponse> searchSummatList(@RequestParam(name = "q", required = false) String query,
                                                     @RequestParam(name = "region", required = false) String region,
                                                     @RequestParam(name = "type", required = false) String type,
                                                     @RequestParam(name = "tags", required = false) List<String> tags) {
@@ -141,13 +126,10 @@ public class PlacesController {
 
         List<PlaceMainListResDto> searchResult = placesService.searchSummatList(query, region, type, tags);
 
-        HashMap<String, Object> result = new HashMap<>();
 
-        result.put("status", searchResult != null ? 200 : 500);
-        result.put("message", searchResult != null ? "place main list search sucess" : "place main list search fail");
-        result.put("data", searchResult);
 
-        return result;
+        return ResponseEntity.status(ResponseCode.PLACE_LIST_SUCCESS.getHttpStatus())
+                .body(new ApiResponse(ResponseCode.PLACE_LIST_SUCCESS, searchResult));
     }
 
 
