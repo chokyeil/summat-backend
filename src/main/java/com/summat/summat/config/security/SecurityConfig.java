@@ -42,9 +42,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // 인증 없이 접근 허용
                         .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/summatUsers/id-check").permitAll()
                         .requestMatchers(HttpMethod.POST, "/summatUsers/signup").permitAll()
                         .requestMatchers(HttpMethod.POST, "/summatUsers/pw-check").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/summatUsers/nick-name-check/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/summatUsers/nick-name-check").permitAll()
                         .requestMatchers(HttpMethod.GET, "/places/list").permitAll()
                         .requestMatchers(HttpMethod.GET, "/places/search/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/places/detail/**").permitAll()
