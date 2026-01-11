@@ -67,7 +67,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             } else {
-                log.info("[JWT FILTER] 토큰 유효하지 않음 ❌");
+                log.info("[JWT FILTER] 토큰 유효하지 않음");
             }
         } else {
             log.info("[JWT FILTER] Authorization 헤더 없음 또는 Bearer 아님");
