@@ -8,11 +8,15 @@ import com.summat.summat.places.entity.PlaceLike;
 import com.summat.summat.places.entity.PlaceTag;
 import com.summat.summat.places.entity.Places;
 import com.summat.summat.places.repository.PlaceLikeRepository;
+import com.summat.summat.places.repository.PlaceTagRepository;
 import com.summat.summat.places.repository.PlacesRepository;
 import com.summat.summat.users.entity.Users;
 import com.summat.summat.users.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -37,6 +41,7 @@ public class PlacesService {
     private final UsersRepository usersRepository;
     private final PlacesRepository placesRepository;
     private final PlaceLikeRepository placeLikeRepository;
+    private final PlaceTagRepository placeTagRepository;
 
     public boolean createdPlace(PlacesReqDto placesReqDto, MultipartFile image, Long userId) {
 
@@ -62,16 +67,18 @@ public class PlacesService {
         place.setPlaceDescription(placesReqDto.getPlaceDescription());
         place.setPlaceImageUrl(imageUrl);
         place.setOneLineDesc(placesReqDto.getOneLineDesc());
-//        place.setPlaceType(placesReqDto.getPlaceType());
+        place.setPlaceType(placesReqDto.getPlaceType());
         place.setPlaceRegion(placesReqDto.getPlaceRegion());
-        place.setLikeCount(0);
-        place.setViewCount(0);
         place.setUsers(user);
 
 
 
         for(String str : placesReqDto.getTags()) {
+            log.info("tag type = " + str);
             PlaceTagType tagType = PlaceTagType.fromCode(str);
+
+            log.info("place tag type = " + tagType);
+
 
             PlaceTag placeTag = new PlaceTag();
             placeTag.setPlace(place);
@@ -87,11 +94,38 @@ public class PlacesService {
 
     }
 
-    public List<Places> getPlacesList() {
+    public List<PlaceMainListResDto> getPlacesList(int page, int size) {
+        Pageable pageable = PageRequest.of(page-1, size);
 
-        List<Places> listPlaces = placesRepository.findAll();
+        Page<Places> pageListPlaces = placesRepository.findAll(pageable);
 
-        return listPlaces.size() > 0 ? listPlaces : null;
+        List<PlaceMainListResDto> placeMainListResDtoList = new ArrayList<>();
+
+        for(Places place : pageListPlaces) {
+            List<PlaceTagType> placeTags = placeTagRepository.findTagTypesByPlaceId(place.getId());
+
+            PlaceMainListResDto placeMainListResDto = new PlaceMainListResDto();
+
+            placeMainListResDto.setPlaceId(place.getId());
+            placeMainListResDto.setPlaceName(place.getPlaceName());
+            placeMainListResDto.setPlaceImageUrl(place.getPlaceImageUrl());
+            placeMainListResDto.setPlaceLotAddress(place.getPlaceLotAddress());
+            placeMainListResDto.setPlaceRoadAddress(place.getPlaceRoadAddress());
+            placeMainListResDto.setOneLineDesc(place.getOneLineDesc());
+            placeMainListResDto.setTags(placeTags);
+            placeMainListResDto.setLikeCount(place.getLikeCount());
+            placeMainListResDto.setViewCount(place.getViewCount());
+
+
+            placeMainListResDtoList.add(placeMainListResDto);
+
+        }
+
+//        List<Places> listPlaces = placesRepository.findAll();
+
+//        return listPlaces.size() > 0 ? listPlaces : null;
+//        return pageListPlaces.getSize() > 0 ? pageListPlaces : null;
+        return placeMainListResDtoList;
     }
 
     public boolean updatePlace(PlacesReqDto placesReqDto, MultipartFile image, Long userId, Long placeId) {
@@ -156,36 +190,14 @@ public class PlacesService {
 
 
     @Transactional
-    public Long increaseView(Long placeId) {
-        placesRepository.increaseViews(placeId);
-
+    public boolean increaseView(Long placeId) {
         Places place = placesRepository.findById(placeId).orElseThrow(() -> new IllegalArgumentException("not found place"));
 
-        return place.getViewCount();
-
-    }
+        boolean isCreaseView = placesRepository.increaseViews(placeId);
 
 
-    private String savePlaceImage(MultipartFile image) {
-        log.info("savePlaceImage 진입!!");
-        if (image == null || image.isEmpty()) {
-            return null;
-        }
+        return isCreaseView;
 
-        try {
-            String fileName = UUID.randomUUID() + "_" + image.getOriginalFilename();
-
-            Path placeDir = Paths.get(uploadDir, "places");
-            Files.createDirectories(placeDir);
-
-            Path savePath = placeDir.resolve(fileName);
-            Files.copy(image.getInputStream(), savePath);
-
-            return "/uploads/places/" + fileName;
-
-        } catch (IOException e) {
-            throw new RuntimeException("이미지 저장 실패", e);
-        }
     }
 
     public boolean toggleLike(Long userId, Long placeId) {
@@ -219,30 +231,76 @@ public class PlacesService {
 
     public List<PlaceMainListResDto> searchSummatList(String query, String region, String type, List<String> tags) {
 
-        List<Places> places = placesRepository.findAll();
-        List<PlaceMainListResDto> result = new ArrayList<>();
-
-        for (Places p : places) {
-
-            List<PlaceTagType> tagTypes = new ArrayList<>();
-            for (PlaceTag pt : p.getPlaceTags()) {
-                tagTypes.add(pt.getTagType());
+        // 1) tags 파싱(콤마 방어)
+        List<String> flatTags = new ArrayList<>();
+        if (tags != null) {
+            for (String t : tags) {
+                for (String part : t.split(",")) {
+                    String v = part.trim();
+                    if (!v.isBlank()) flatTags.add(v);
+                }
             }
+        }
 
-            result.add(new PlaceMainListResDto(
-                    p.getId(),
-                    p.getPlaceName(),
-                    p.getPlaceRegion(),
-                    p.getPlaceType(),
-                    p.getPlaceImageUrl(),
-                    tagTypes,
-                    p.getLikeCount(),
-                    p.getViewCount()
-            ));
+        // 2) tagTypes: 없으면 null
+        List<PlaceTagType> tagTypes = null;
+        if (!flatTags.isEmpty()) {
+            tagTypes = new ArrayList<>();
+            for (String tag : flatTags) {
+                tagTypes.add(PlaceTagType.fromCode(tag));
+            }
         }
 
 
+        List<Places> places = placesRepository.searchPlacesExistsTags(query, region, type, tagTypes);
+
+
+        List<PlaceMainListResDto> result = new ArrayList<>();
+        for (Places place : places) {
+
+            List<PlaceTagType> dtoTags = new ArrayList<>();
+            for (PlaceTag pt : place.getPlaceTags()) {
+                dtoTags.add(pt.getTagType());
+            }
+
+            PlaceMainListResDto dto = new PlaceMainListResDto();
+            dto.setPlaceId(place.getId());
+            dto.setPlaceName(place.getPlaceName());
+            dto.setPlaceImageUrl(place.getPlaceImageUrl());
+            dto.setPlaceLotAddress(place.getPlaceLotAddress());
+            dto.setPlaceRoadAddress(place.getPlaceRoadAddress());
+            dto.setOneLineDesc(place.getOneLineDesc());
+            dto.setTags(dtoTags);
+            dto.setLikeCount(place.getLikeCount());
+            dto.setViewCount(place.getViewCount());
+
+            result.add(dto);
+        }
 
         return result;
     }
+
+
+    private String savePlaceImage(MultipartFile image) {
+        log.info("savePlaceImage 진입!!");
+        if (image == null || image.isEmpty()) {
+            return null;
+        }
+
+        try {
+            String fileName = UUID.randomUUID() + "_" + image.getOriginalFilename();
+
+            Path placeDir = Paths.get(uploadDir, "places");
+            Files.createDirectories(placeDir);
+
+            Path savePath = placeDir.resolve(fileName);
+            Files.copy(image.getInputStream(), savePath);
+
+            return "/uploads/places/" + fileName;
+
+        } catch (IOException e) {
+            throw new RuntimeException("이미지 저장 실패", e);
+        }
+    }
+
 }
