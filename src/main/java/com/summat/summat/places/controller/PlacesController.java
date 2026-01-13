@@ -2,6 +2,7 @@ package com.summat.summat.places.controller;
 
 import com.summat.summat.common.response.ApiResponse;
 import com.summat.summat.common.response.ResponseCode;
+import com.summat.summat.places.dto.places.PlaceListPageResDto;
 import com.summat.summat.places.dto.places.PlaceMainListResDto;
 import com.summat.summat.places.dto.places.PlacesDetailResDto;
 import com.summat.summat.places.dto.places.PlacesReqDto;
@@ -55,7 +56,7 @@ public class PlacesController {
 
 
 
-        List<PlaceMainListResDto> resultData = placesService.getPlacesList(page, size);
+        PlaceListPageResDto resultData = placesService.getPlacesList(page, size);
 
 
         return ResponseEntity.status(ResponseCode.PLACE_LIST_SUCCESS.getHttpStatus())
@@ -117,14 +118,17 @@ public class PlacesController {
                 .body(isPlaceLike ? new ApiResponse(ResponseCode.PLACE_LIKE_SUCCESS, null) : new ApiResponse(ResponseCode.PLACE_NOT_FOUND, null));
     }
 
+    // 복합 조건 조회
     @GetMapping("/search")
-    public ResponseEntity<ApiResponse> searchSummatList(@RequestParam(name = "q", required = false) String query,
-                                                    @RequestParam(name = "region", required = false) String region,
-                                                    @RequestParam(name = "type", required = false) String type,
-                                                    @RequestParam(name = "tags", required = false) List<String> tags) {
+    public ResponseEntity<ApiResponse> searchSummatList(@RequestParam(defaultValue = "0") int page,
+                                                        @RequestParam(defaultValue = "10") int size,
+                                                        @RequestParam(name = "q", required = false) String query,
+                                                        @RequestParam(name = "region", required = false) String region,
+                                                        @RequestParam(name = "type", required = false) String type,
+                                                        @RequestParam(name = "tags", required = false) List<String> tags) {
 
 
-        List<PlaceMainListResDto> searchResult = placesService.searchSummatList(query, region, type, tags);
+        PlaceListPageResDto searchResult = placesService.searchSummatList(page, size, query, region, type, tags);
 
 
 
