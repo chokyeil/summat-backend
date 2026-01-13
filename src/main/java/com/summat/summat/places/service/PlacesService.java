@@ -1,6 +1,7 @@
 package com.summat.summat.places.service;
 
 import com.summat.summat.enums.PlaceTagType;
+import com.summat.summat.places.dto.places.PlaceListPageResDto;
 import com.summat.summat.places.dto.places.PlaceMainListResDto;
 import com.summat.summat.places.dto.places.PlacesDetailResDto;
 import com.summat.summat.places.dto.places.PlacesReqDto;
@@ -94,12 +95,15 @@ public class PlacesService {
 
     }
 
-    public List<PlaceMainListResDto> getPlacesList(int page, int size) {
-        Pageable pageable = PageRequest.of(page-1, size);
+    public PlaceListPageResDto getPlacesList(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
 
         Page<Places> pageListPlaces = placesRepository.findAll(pageable);
 
+
         List<PlaceMainListResDto> placeMainListResDtoList = new ArrayList<>();
+
+        PlaceListPageResDto placeListPageResDto = new PlaceListPageResDto();
 
         for(Places place : pageListPlaces) {
             List<PlaceTagType> placeTags = placeTagRepository.findTagTypesByPlaceId(place.getId());
@@ -121,11 +125,14 @@ public class PlacesService {
 
         }
 
-//        List<Places> listPlaces = placesRepository.findAll();
+        placeListPageResDto.setPlaceList(placeMainListResDtoList);
+        placeListPageResDto.setPage(pageListPlaces.getNumber());
+        placeListPageResDto.setSize(pageListPlaces.getSize());
+        placeListPageResDto.setTotalElements(pageListPlaces.getTotalElements());
+        placeListPageResDto.setTotalPages(pageListPlaces.getTotalPages());
+        placeListPageResDto.setHasNext(pageListPlaces.hasNext());
 
-//        return listPlaces.size() > 0 ? listPlaces : null;
-//        return pageListPlaces.getSize() > 0 ? pageListPlaces : null;
-        return placeMainListResDtoList;
+        return placeListPageResDto;
     }
 
     public boolean updatePlace(PlacesReqDto placesReqDto, MultipartFile image, Long userId, Long placeId) {
@@ -229,7 +236,13 @@ public class PlacesService {
         return isPlaceLikeResult;
     }
 
-    public List<PlaceMainListResDto> searchSummatList(String query, String region, String type, List<String> tags) {
+    public PlaceListPageResDto searchSummatList(int page,
+                                                int size,
+                                                String query,
+                                                String region,
+                                                String type,
+                                                List<String> tags) {
+        Pageable pageable = PageRequest.of(page, size);
 
         // 1) tags 파싱(콤마 방어)
         List<String> flatTags = new ArrayList<>();
@@ -252,11 +265,11 @@ public class PlacesService {
         }
 
 
-        List<Places> places = placesRepository.searchPlacesExistsTags(query, region, type, tagTypes);
+        Page<Places> pageListPlaces = placesRepository.searchPlacesExistsTags(pageable, query, region, type, tagTypes);
+        PlaceListPageResDto placeListPageResDto = new PlaceListPageResDto();
 
-
-        List<PlaceMainListResDto> result = new ArrayList<>();
-        for (Places place : places) {
+        List<PlaceMainListResDto> placeMainListResDtoList = new ArrayList<>();
+        for (Places place : pageListPlaces) {
 
             List<PlaceTagType> dtoTags = new ArrayList<>();
             for (PlaceTag pt : place.getPlaceTags()) {
@@ -274,10 +287,17 @@ public class PlacesService {
             dto.setLikeCount(place.getLikeCount());
             dto.setViewCount(place.getViewCount());
 
-            result.add(dto);
+            placeMainListResDtoList.add(dto);
         }
 
-        return result;
+        placeListPageResDto.setPlaceList(placeMainListResDtoList);
+        placeListPageResDto.setPage(pageListPlaces.getNumber());
+        placeListPageResDto.setSize(pageListPlaces.getSize());
+        placeListPageResDto.setTotalElements(pageListPlaces.getTotalElements());
+        placeListPageResDto.setTotalPages(pageListPlaces.getTotalPages());
+        placeListPageResDto.setHasNext(pageListPlaces.hasNext());
+
+        return placeListPageResDto;
     }
 
 
