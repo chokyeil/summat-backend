@@ -1,4 +1,4 @@
-package com.summat.summat.places.dto.places;
+package com.summat.summat.places.dto.places.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
