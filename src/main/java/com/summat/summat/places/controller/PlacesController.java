@@ -2,26 +2,22 @@ package com.summat.summat.places.controller;
 
 import com.summat.summat.common.response.ApiResponse;
 import com.summat.summat.common.response.ResponseCode;
-import com.summat.summat.places.dto.places.PlaceListPageResDto;
-import com.summat.summat.places.dto.places.PlaceMainListResDto;
-import com.summat.summat.places.dto.places.PlacesDetailResDto;
-import com.summat.summat.places.dto.places.PlacesReqDto;
-import com.summat.summat.places.entity.PlaceLike;
-import com.summat.summat.places.entity.Places;
+import com.summat.summat.places.dto.places.response.PlaceListPageResDto;
+import com.summat.summat.places.dto.places.response.PlacesDetailResDto;
+import com.summat.summat.places.dto.places.request.PlacesReqDto;
 import com.summat.summat.places.service.PlacesService;
 import com.summat.summat.users.CustomUserDetails;
 import com.summat.summat.users.repository.UsersRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.HashMap;
 import java.util.List;
 
 @RestController
@@ -52,11 +48,13 @@ public class PlacesController {
 
     @GetMapping("/list")
     public ResponseEntity<ApiResponse> boardList(@RequestParam(defaultValue = "0") int page,
-                                             @RequestParam(defaultValue = "10") int size) {
+                                             @RequestParam(defaultValue = "10") int size,
+                                             Pageable pageable) {
 
 
 
-        PlaceListPageResDto resultData = placesService.getPlacesList(page, size);
+//        PlaceListPageResDto resultData = placesService.getPlacesList(page, size);
+        PlaceListPageResDto resultData = placesService.getPlacesList(pageable);
 
 
         return ResponseEntity.status(ResponseCode.PLACE_LIST_SUCCESS.getHttpStatus())
