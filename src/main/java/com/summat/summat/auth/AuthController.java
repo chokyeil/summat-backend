@@ -3,9 +3,12 @@ package com.summat.summat.auth;
 import com.summat.summat.auth.dto.LoginRequest;
 import com.summat.summat.auth.dto.LoginResponse;
 import com.summat.summat.auth.service.RefreshTokenService;
+import com.summat.summat.common.response.ApiResponse;
+import com.summat.summat.common.response.ResponseCode;
 import com.summat.summat.config.security.jwt.JwtTokenProvider;
 import com.summat.summat.users.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -28,7 +31,7 @@ public class AuthController {
 
     // 1) 로그인: access + refresh 발급
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
+    public ResponseEntity<ApiResponse> login(@RequestBody LoginRequest request) {
 
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getUserId(), request.getUserPw())
@@ -42,7 +45,8 @@ public class AuthController {
         Instant refreshExpiry = Instant.now().plusSeconds(60L * 60 * 24 * 7); // 7일 예시
         refreshTokenService.saveRefreshToken(userDetails.getUsername(), refreshToken, refreshExpiry);
 
-        return ResponseEntity.ok(new LoginResponse(accessToken, "Bearer", refreshToken));
+//        return ResponseEntity.ok(new LoginResponse(accessToken, "Bearer", refreshToken));
+        return ResponseEntity.status(ResponseCode.LOGIN_SUCCESS.getHttpStatus()).body(new ApiResponse<>(ResponseCode.LOGIN_SUCCESS, new LoginResponse(accessToken, "Bearer", refreshToken)));
     }
 
     // 2) Refresh 토큰으로 Access 토큰 재발급
