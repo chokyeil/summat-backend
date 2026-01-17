@@ -47,13 +47,8 @@ public class PlacesController {
     }
 
     @GetMapping("/list")
-    public ResponseEntity<ApiResponse> boardList(@RequestParam(defaultValue = "0") int page,
-                                             @RequestParam(defaultValue = "10") int size,
-                                             Pageable pageable) {
+    public ResponseEntity<ApiResponse> boardList(Pageable pageable) {
 
-
-
-//        PlaceListPageResDto resultData = placesService.getPlacesList(page, size);
         PlaceListPageResDto resultData = placesService.getPlacesList(pageable);
 
 
@@ -118,15 +113,14 @@ public class PlacesController {
 
     // 복합 조건 조회
     @GetMapping("/search")
-    public ResponseEntity<ApiResponse> searchSummatList(@RequestParam(defaultValue = "0") int page,
-                                                        @RequestParam(defaultValue = "10") int size,
+    public ResponseEntity<ApiResponse> searchSummatList(Pageable pageable,
                                                         @RequestParam(name = "q", required = false) String query,
-                                                        @RequestParam(name = "region", required = false) String region,
-                                                        @RequestParam(name = "type", required = false) String type,
+                                                        @RequestParam(name = "region", required = false) List<String> region,
+                                                        @RequestParam(name = "type", required = false) List<String> type,
                                                         @RequestParam(name = "tags", required = false) List<String> tags) {
 
 
-        PlaceListPageResDto searchResult = placesService.searchSummatList(page, size, query, region, type, tags);
+        PlaceListPageResDto searchResult = placesService.searchSummatList(pageable, query, region, type, tags);
 
 
 
