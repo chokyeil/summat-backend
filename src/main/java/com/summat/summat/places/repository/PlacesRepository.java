@@ -41,33 +41,51 @@ public interface PlacesRepository extends JpaRepository<Places, Long> {
     Page<PlacesFindResponseProjection> findMainList(Pageable pageable);
 
 
-    @Query("""
-            select p
-            from Places p
-            where
-                (:q is null or :q = '' or
-                    lower(p.placeName) like lower(concat('%', :q, '%')) or
-                    lower(p.placeLotAddress) like lower(concat('%', :q, '%')) or
-                    lower(p.placeRoadAddress) like lower(concat('%', :q, '%'))
-                )
-              and (:region is null or :region = '' or p.placeRegion = :region)
-              and (:type is null or :type = '' or p.placeType = :type)
-              and (
-                    :tagTypes is null
-                    or exists (
-                        select 1
-                        from PlaceTag pt
-                        where pt.place = p and pt.tagType in :tagTypes
-                    )
-              )
-            order by p.createdAt desc
-            """)
-    Page<PlacesFindResponseDto> searchPlacesExistsTags(
-            @Param("pageable") Pageable pageable,
+    @Query(
+            value = """
+    SELECT
+      p.places_id         AS placesId,
+      p.place_name        AS placeName,
+      p.place_image_url   AS placeImageUrl,
+      p.one_line_desc     AS oneLineDesc,
+      p.place_lot_address AS placeLotAddress,
+      p.place_road_address AS placeRoadAddress,
+      p.place_type        AS placeType,
+      p.like_count        AS likeCount,
+      p.view_count        AS viewCount,
+      p.created_at        AS createdAt
+    FROM places p
+    WHERE
+      (:q IS NULL OR :q = '' OR
+        LOWER(p.place_name) LIKE CONCAT('%', LOWER(:q), '%') OR
+        LOWER(p.place_lot_address) LIKE CONCAT('%', LOWER(:q), '%') OR
+        LOWER(p.place_road_address) LIKE CONCAT('%', LOWER(:q), '%')
+      )
+      AND (:region IS NULL OR :region = '' OR p.place_region = :region)
+      AND (:type IS NULL OR :type = '' OR p.place_type = :type)
+    ORDER BY p.created_at DESC
+  """,
+            countQuery = """
+    SELECT COUNT(*)
+    FROM places p
+    WHERE
+      (:q IS NULL OR :q = '' OR
+        LOWER(p.place_name) LIKE CONCAT('%', LOWER(:q), '%') OR
+        LOWER(p.place_lot_address) LIKE CONCAT('%', LOWER(:q), '%') OR
+        LOWER(p.place_road_address) LIKE CONCAT('%', LOWER(:q), '%')
+      )
+      AND (:region IS NULL OR :region = '' OR p.place_region = :region)
+      AND (:type IS NULL OR :type = '' OR p.place_type = :type)
+  """,
+            nativeQuery = true
+    )
+    Page<PlacesFindResponseProjection> searchPlacesExistsTags(
             @Param("q") String q,
-            @Param("region") String region,
-            @Param("type") String type,
-            @Param("tagTypes") List<PlaceTagType> tagTypes
+            @Param("region") List<String> region,
+            @Param("type") List<String> type,
+            Pageable pageable
     );
+
+
 
 }

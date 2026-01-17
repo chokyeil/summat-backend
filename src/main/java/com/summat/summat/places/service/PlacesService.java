@@ -98,7 +98,6 @@ public class PlacesService {
     }
 
     public PlaceListPageResDto getPlacesList(Pageable pageable) {
-//        Pageable pageable = PageRequest.of(page, size);
 
         Page<PlacesFindResponseProjection> placesFindResponseList = placesRepository.findMainList(pageable);
 
@@ -108,22 +107,7 @@ public class PlacesService {
         for(PlacesFindResponseProjection placesFindResponse : placesFindResponseList) {
             List<PlaceTagType> placeTags = placeTagRepository.findTagTypesByPlaceId(placesFindResponse.getPlacesId());
             PlaceMainListResDto placeMainListResDto = new PlaceMainListResDto();
-//            PlacesFindResponseDto placesFindResponseDto = new PlacesFindResponseDto(
-//                    placesFindResponse.getPlacesId(),
-//                    placesFindResponse.getPlaceName(),
-//                    placesFindResponse.getPlaceImageUrl(),
-//                    placesFindResponse.getOneLineDesc(),
-//                    placesFindResponse.getPlaceLotAddress(),
-//                    placesFindResponse.getPlaceRoadAddress(),
-//                    placesFindResponse.getPlaceType(),
-//                    placesFindResponse.getLikeCount(),
-//                    placesFindResponse.getViewCount(),
-//                    placesFindResponse.getCreatedAt()
-//            );
 
-
-//            placeMainListResDto.setPlacesFindResponseDto(placesFindResponseDto);
-//            placeMainListResDto.setPlacesFindResponseProjection(placesFindResponse);
             placeMainListResDto.setPlaceId(placesFindResponse.getPlacesId());
             placeMainListResDto.setPlaceName(placesFindResponse.getPlaceName());
             placeMainListResDto.setPlaceImageUrl(placesFindResponse.getPlaceImageUrl());
@@ -251,69 +235,65 @@ public class PlacesService {
         return isPlaceLikeResult;
     }
 
-    public PlaceListPageResDto searchSummatList(int page,
-                                                int size,
+    public PlaceListPageResDto searchSummatList(Pageable pageable,
                                                 String query,
-                                                String region,
-                                                String type,
+                                                List<String> region,
+                                                List<String> type,
                                                 List<String> tags) {
-        Pageable pageable = PageRequest.of(page, size);
 
-//        // 1) tags 파싱(콤마 방어)
-//        List<String> flatTags = new ArrayList<>();
-//        if (tags != null) {
-//            for (String t : tags) {
-//                for (String part : t.split(",")) {
-//                    String v = part.trim();
-//                    if (!v.isBlank()) flatTags.add(v);
-//                }
-//            }
-//        }
-//
-//        // 2) tagTypes: 없으면 null
-//        List<PlaceTagType> tagTypes = null;
-//        if (!flatTags.isEmpty()) {
-//            tagTypes = new ArrayList<>();
-//            for (String tag : flatTags) {
-//                tagTypes.add(PlaceTagType.fromCode(tag));
-//            }
-//        }
-//
-//
-//        Page<Places> pageListPlaces = placesRepository.searchPlacesExistsTags(pageable, query, region, type, tagTypes);
-//        PlaceListPageResDto placeListPageResDto = new PlaceListPageResDto();
-//
-//        List<PlaceMainListResDto> placeMainListResDtoList = new ArrayList<>();
-//        for (Places place : pageListPlaces) {
-//
-//            List<PlaceTagType> dtoTags = new ArrayList<>();
-//            for (PlaceTag pt : place.getPlaceTags()) {
-//                dtoTags.add(pt.getTagType());
-//            }
-//
-//            PlaceMainListResDto dto = new PlaceMainListResDto();
-//            dto.setPlaceId(place.getId());
-//            dto.setPlaceName(place.getPlaceName());
-//            dto.setPlaceImageUrl(place.getPlaceImageUrl());
-//            dto.setPlaceLotAddress(place.getPlaceLotAddress());
-//            dto.setPlaceRoadAddress(place.getPlaceRoadAddress());
-//            dto.setOneLineDesc(place.getOneLineDesc());
-//            dto.setTags(dtoTags);
-//            dto.setLikeCount(place.getLikeCount());
-//            dto.setViewCount(place.getViewCount());
-//
-//            placeMainListResDtoList.add(dto);
-//        }
-//
-//        placeListPageResDto.setPlaceList(placeMainListResDtoList);
-//        placeListPageResDto.setPage(pageListPlaces.getNumber());
-//        placeListPageResDto.setSize(pageListPlaces.getSize());
-//        placeListPageResDto.setTotalElements(pageListPlaces.getTotalElements());
-//        placeListPageResDto.setTotalPages(pageListPlaces.getTotalPages());
-//        placeListPageResDto.setHasNext(pageListPlaces.hasNext());
-//
-//        return placeListPageResDto;
-        return null;
+        // 1) tags 파싱(콤마 방어)
+        List<String> flatTags = new ArrayList<>();
+        if (tags != null) {
+            for (String t : tags) {
+                for (String part : t.split(",")) {
+                    String v = part.trim();
+                    if (!v.isBlank()) flatTags.add(v);
+                }
+            }
+        }
+
+        // 2) tagTypes: 없으면 null
+        List<PlaceTagType> tagTypes = null;
+        if (!flatTags.isEmpty()) {
+            tagTypes = new ArrayList<>();
+            for (String tag : flatTags) {
+                tagTypes.add(PlaceTagType.fromCode(tag));
+            }
+        }
+
+        Page<PlacesFindResponseProjection> placesFindResponseList = placesRepository.searchPlacesExistsTags(query, region, type, pageable);
+
+        List<PlaceMainListResDto> placeMainListResDtoList = new ArrayList<>();
+        PlaceListPageResDto placeListPageResDto = new PlaceListPageResDto();
+
+        for(PlacesFindResponseProjection placesFindResponse : placesFindResponseList) {
+            List<PlaceTagType> placeTags = placeTagRepository.findTagTypesByPlaceId(placesFindResponse.getPlacesId());
+            PlaceMainListResDto placeMainListResDto = new PlaceMainListResDto();
+
+            placeMainListResDto.setPlaceId(placesFindResponse.getPlacesId());
+            placeMainListResDto.setPlaceName(placesFindResponse.getPlaceName());
+            placeMainListResDto.setPlaceImageUrl(placesFindResponse.getPlaceImageUrl());
+            placeMainListResDto.setOneLineDesc(placesFindResponse.getOneLineDesc());
+            placeMainListResDto.setPlaceLotAddress(placesFindResponse.getPlaceLotAddress());
+            placeMainListResDto.setPlaceRoadAddress(placesFindResponse.getPlaceRoadAddress());
+            placeMainListResDto.setLikeCount(placesFindResponse.getLikeCount());
+            placeMainListResDto.setViewCount(placesFindResponse.getViewCount());
+            placeMainListResDto.setCreatedAt(placesFindResponse.getCreatedAt());
+            placeMainListResDto.setTags(placeTags);
+
+
+            placeMainListResDtoList.add(placeMainListResDto);
+
+        }
+
+        placeListPageResDto.setPlaceList(placeMainListResDtoList);
+        placeListPageResDto.setPage(placesFindResponseList.getNumber());
+        placeListPageResDto.setSize(placesFindResponseList.getSize());
+        placeListPageResDto.setTotalElements(placesFindResponseList.getTotalElements());
+        placeListPageResDto.setTotalPages(placesFindResponseList.getTotalPages());
+        placeListPageResDto.setHasNext(placesFindResponseList.hasNext());
+
+        return placeListPageResDto;
     }
 
 
