@@ -10,6 +10,7 @@ import com.summat.summat.places.entity.PlaceLike;
 import com.summat.summat.places.entity.PlaceTag;
 import com.summat.summat.places.entity.Places;
 import com.summat.summat.places.repository.PlaceLikeRepository;
+import com.summat.summat.places.repository.PlaceQueryRepository;
 import com.summat.summat.places.repository.PlaceTagRepository;
 import com.summat.summat.places.repository.PlacesRepository;
 import com.summat.summat.places.repository.dto.PlacesFindResponseProjection;
@@ -45,6 +46,7 @@ public class PlacesService {
     private final PlacesRepository placesRepository;
     private final PlaceLikeRepository placeLikeRepository;
     private final PlaceTagRepository placeTagRepository;
+    private final PlaceQueryRepository placeQueryRepository;
 
     public boolean createdPlace(PlacesReqDto placesReqDto, MultipartFile image, Long userId) {
 
@@ -241,6 +243,19 @@ public class PlacesService {
                                                 List<String> type,
                                                 List<String> tags) {
 
+        List<String> regionsParam = (region == null || region.isEmpty())
+                ? List.of("__DUMMY__")   // 절대 존재하지 않을 값
+                : region;
+
+        boolean regionEmpty = (region == null || region.isEmpty());
+
+        List<String> typesParam = (type == null || type.isEmpty())
+                ? List.of("__DUMMY__")
+                : type;
+
+        boolean typeEmpty = (type == null || type.isEmpty());
+
+
         // 1) tags 파싱(콤마 방어)
         List<String> flatTags = new ArrayList<>();
         if (tags != null) {
@@ -260,13 +275,13 @@ public class PlacesService {
                 tagTypes.add(PlaceTagType.fromCode(tag));
             }
         }
-
-        Page<PlacesFindResponseProjection> placesFindResponseList = placesRepository.searchPlacesExistsTags(query, region, type, pageable);
+        Page<PlacesFindResponseDto> result = placeQueryRepository.findMainList(query, region, type, pageable);
+//        Page<PlacesFindResponseProjection> placesFindResponseList = placesRepository.searchPlacesNative(query, regionsParam, regionEmpty, typesParam, typeEmpty, pageable);
 
         List<PlaceMainListResDto> placeMainListResDtoList = new ArrayList<>();
         PlaceListPageResDto placeListPageResDto = new PlaceListPageResDto();
 
-        for(PlacesFindResponseProjection placesFindResponse : placesFindResponseList) {
+        for(PlacesFindResponseDto placesFindResponse : result) {
             List<PlaceTagType> placeTags = placeTagRepository.findTagTypesByPlaceId(placesFindResponse.getPlacesId());
             PlaceMainListResDto placeMainListResDto = new PlaceMainListResDto();
 
@@ -287,11 +302,11 @@ public class PlacesService {
         }
 
         placeListPageResDto.setPlaceList(placeMainListResDtoList);
-        placeListPageResDto.setPage(placesFindResponseList.getNumber());
-        placeListPageResDto.setSize(placesFindResponseList.getSize());
-        placeListPageResDto.setTotalElements(placesFindResponseList.getTotalElements());
-        placeListPageResDto.setTotalPages(placesFindResponseList.getTotalPages());
-        placeListPageResDto.setHasNext(placesFindResponseList.hasNext());
+        placeListPageResDto.setPage(result.getNumber());
+        placeListPageResDto.setSize(result.getSize());
+        placeListPageResDto.setTotalElements(result.getTotalElements());
+        placeListPageResDto.setTotalPages(result.getTotalPages());
+        placeListPageResDto.setHasNext(result.hasNext());
 
         return placeListPageResDto;
     }

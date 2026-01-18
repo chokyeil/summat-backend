@@ -119,6 +119,7 @@ public class PlacesController {
                                                         @RequestParam(name = "type", required = false) List<String> type,
                                                         @RequestParam(name = "tags", required = false) List<String> tags) {
 
+        log.info("q='{}'", query);
 
         PlaceListPageResDto searchResult = placesService.searchSummatList(pageable, query, region, type, tags);
 

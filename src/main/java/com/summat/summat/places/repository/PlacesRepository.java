@@ -44,16 +44,16 @@ public interface PlacesRepository extends JpaRepository<Places, Long> {
     @Query(
             value = """
     SELECT
-      p.places_id         AS placesId,
-      p.place_name        AS placeName,
-      p.place_image_url   AS placeImageUrl,
-      p.one_line_desc     AS oneLineDesc,
-      p.place_lot_address AS placeLotAddress,
+      p.places_id          AS placesId,
+      p.place_name         AS placeName,
+      p.place_image_url    AS placeImageUrl,
+      p.one_line_desc      AS oneLineDesc,
+      p.place_lot_address  AS placeLotAddress,
       p.place_road_address AS placeRoadAddress,
-      p.place_type        AS placeType,
-      p.like_count        AS likeCount,
-      p.view_count        AS viewCount,
-      p.created_at        AS createdAt
+      p.place_type         AS placeType,
+      p.like_count         AS likeCount,
+      p.view_count         AS viewCount,
+      p.created_at         AS createdAt
     FROM places p
     WHERE
       (:q IS NULL OR :q = '' OR
@@ -61,8 +61,8 @@ public interface PlacesRepository extends JpaRepository<Places, Long> {
         LOWER(p.place_lot_address) LIKE CONCAT('%', LOWER(:q), '%') OR
         LOWER(p.place_road_address) LIKE CONCAT('%', LOWER(:q), '%')
       )
-      AND (:region IS NULL OR :region = '' OR p.place_region = :region)
-      AND (:type IS NULL OR :type = '' OR p.place_type = :type)
+      AND (:regionEmpty = TRUE OR p.place_region IN (:region))
+      AND (:typeEmpty   = TRUE OR p.place_type   IN (:type))
     ORDER BY p.created_at DESC
   """,
             countQuery = """
@@ -74,17 +74,20 @@ public interface PlacesRepository extends JpaRepository<Places, Long> {
         LOWER(p.place_lot_address) LIKE CONCAT('%', LOWER(:q), '%') OR
         LOWER(p.place_road_address) LIKE CONCAT('%', LOWER(:q), '%')
       )
-      AND (:region IS NULL OR :region = '' OR p.place_region = :region)
-      AND (:type IS NULL OR :type = '' OR p.place_type = :type)
+      AND (:regionEmpty = TRUE OR p.place_region IN (:region))
+      AND (:typeEmpty   = TRUE OR p.place_type   IN (:type))
   """,
             nativeQuery = true
     )
-    Page<PlacesFindResponseProjection> searchPlacesExistsTags(
+    Page<PlacesFindResponseProjection> searchPlacesNative(
             @Param("q") String q,
             @Param("region") List<String> region,
+            @Param("regionEmpty") boolean regionEmpty,
             @Param("type") List<String> type,
+            @Param("typeEmpty") boolean typeEmpty,
             Pageable pageable
     );
+
 
 
 
