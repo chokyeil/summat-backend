@@ -17,6 +17,7 @@ public class PlaceMainListResDto {
     private String placeName;
     private String placeLotAddress;
     private String placeRoadAddress;
+    private String placeType;
     private String placeImageUrl;
     private String oneLineDesc;
     private List<PlaceTagType> tags;
