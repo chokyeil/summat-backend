@@ -3,6 +3,8 @@ package com.summat.summat.places.repository;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.summat.summat.places.dto.places.response.PlacesFindResponseDto;
 import com.summat.summat.places.entity.QPlaces;
@@ -48,7 +50,7 @@ public class PlaceQueryRepositoryImpl implements PlaceQueryRepository{
                 .from(p)
                 .where(where)
 //                .orderBy(p.createdAt.desc())
-                .orderBy(p.createdAt.desc(), p.id.desc())
+//                .orderBy(p.createdAt.desc(), p.id.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
