@@ -40,50 +40,51 @@ public interface PlacesRepository extends JpaRepository<Places, Long> {
             , nativeQuery = true)
     Page<PlacesFindResponseProjection> findMainList(Pageable pageable);
 
-
     @Query(
             value = """
     SELECT
-      p.places_id          AS placesId,
-      p.place_name         AS placeName,
-      p.place_image_url    AS placeImageUrl,
-      p.one_line_desc      AS oneLineDesc,
-      p.place_lot_address  AS placeLotAddress,
-      p.place_road_address AS placeRoadAddress,
-      p.place_type         AS placeType,
-      p.like_count         AS likeCount,
-      p.view_count         AS viewCount,
-      p.created_at         AS createdAt
+        p.places_id          AS placesId,
+        p.place_name         AS placeName,
+        p.place_image_url    AS placeImageUrl,
+        p.one_line_desc      AS oneLineDesc,
+        p.place_lot_address  AS placeLotAddress,
+        p.place_road_address AS placeRoadAddress,
+        p.place_type         AS placeType,
+        p.like_count         AS likeCount,
+        p.view_count         AS viewCount,
+        p.created_at         AS createdAt
     FROM places p
     WHERE
-      (:q IS NULL OR :q = '' OR
-        LOWER(p.place_name) LIKE CONCAT('%', LOWER(:q), '%') OR
-        LOWER(p.place_lot_address) LIKE CONCAT('%', LOWER(:q), '%') OR
-        LOWER(p.place_road_address) LIKE CONCAT('%', LOWER(:q), '%')
+      (
+        :qEmpty = true
+        OR p.place_name LIKE CONCAT(:qPrefix, '%')
+        OR MATCH(p.place_name, p.one_line_desc, p.place_description)
+           AGAINST (:against IN BOOLEAN MODE)
       )
-      AND (:regionEmpty = TRUE OR p.place_region IN (:region))
-      AND (:typeEmpty   = TRUE OR p.place_type   IN (:type))
+      AND (:regionEmpty = true OR p.place_region IN (:regions))
+      AND (:typeEmpty = true OR p.place_type IN (:types))
     ORDER BY p.created_at DESC
   """,
             countQuery = """
     SELECT COUNT(*)
     FROM places p
     WHERE
-      (:q IS NULL OR :q = '' OR
-        LOWER(p.place_name) LIKE CONCAT('%', LOWER(:q), '%') OR
-        LOWER(p.place_lot_address) LIKE CONCAT('%', LOWER(:q), '%') OR
-        LOWER(p.place_road_address) LIKE CONCAT('%', LOWER(:q), '%')
+      (
+        :qEmpty = true
+        OR p.place_name LIKE CONCAT(:qPrefix, '%')
+        OR MATCH(p.place_name, p.one_line_desc, p.place_description)
+           AGAINST (:against IN BOOLEAN MODE)
       )
-      AND (:regionEmpty = TRUE OR p.place_region IN (:region))
-      AND (:typeEmpty   = TRUE OR p.place_type   IN (:type))
+      AND (:regionEmpty = true OR p.place_region IN (:regions))
+      AND (:typeEmpty = true OR p.place_type IN (:types))
   """,
             nativeQuery = true
     )
-    Page<PlacesFindResponseProjection> searchPlacesNative(
-            @Param("q") String q,
-            @Param("region") List<String> region,
+    Page<PlacesFindResponseProjection> searchPlacesUnified(
+            @Param("against") String against,
+            @Param("regions") List<String> regions,
             @Param("regionEmpty") boolean regionEmpty,
-            @Param("type") List<String> type,
+            @Param("types") List<String> types,
             @Param("typeEmpty") boolean typeEmpty,
             Pageable pageable
     );
