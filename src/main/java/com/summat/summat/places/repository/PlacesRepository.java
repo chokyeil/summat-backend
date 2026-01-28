@@ -81,6 +81,8 @@ public interface PlacesRepository extends JpaRepository<Places, Long> {
             nativeQuery = true
     )
     Page<PlacesFindResponseProjection> searchPlacesUnified(
+            @Param("qEmpty") boolean qEmpty,
+            @Param("qPrefix") String qPrefix,
             @Param("against") String against,
             @Param("regions") List<String> regions,
             @Param("regionEmpty") boolean regionEmpty,

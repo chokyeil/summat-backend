@@ -255,6 +255,14 @@ public class PlacesService {
 
         boolean typeEmpty = (type == null || type.isEmpty());
 
+        boolean qEmpty = (query == null || query.isBlank());
+
+        // prefix LIKE용
+        String qPrefix = qEmpty ? "" : query.trim();
+
+        // FULLTEXT용 (boolean mode prefix 검색)
+        String against = qEmpty ? "" : query.trim() + "*";
+
 
         // 1) tags 파싱(콤마 방어)
         List<String> flatTags = new ArrayList<>();
@@ -276,7 +284,16 @@ public class PlacesService {
             }
         }
 //        Page<PlacesFindResponseDto> result = placeQueryRepository.findMainList(query, region, type, pageable);
-        Page<PlacesFindResponseProjection> placesFindResponseList = placesRepository.searchPlacesUnified(query, regionsParam, regionEmpty, typesParam, typeEmpty, pageable);
+        Page<PlacesFindResponseProjection> placesFindResponseList = placesRepository.searchPlacesUnified(
+                        qEmpty,
+                        qPrefix,
+                        against,
+                        regionsParam,
+                        regionEmpty,
+                        typesParam,
+                        typeEmpty,
+                        pageable
+                );
 
         List<PlaceMainListResDto> placeMainListResDtoList = new ArrayList<>();
         PlaceListPageResDto placeListPageResDto = new PlaceListPageResDto();
