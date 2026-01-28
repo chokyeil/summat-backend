@@ -21,8 +21,8 @@ public class Users {
     @Column(name = "users_id")
     private Long id;
 
-    @Column(name = "id", nullable = false, length = 20, unique = true)
-    private String userId;
+    @Column(name = "email", nullable = false, unique = true, length = 100)
+    private String email;
 
     @Column(name = "password", nullable = false, length = 100)
     @JsonIgnore
@@ -34,6 +34,13 @@ public class Users {
     @Column(nullable = false, length = 15)
     @Enumerated(EnumType.STRING)
     private RoleType role = RoleType.ROLE_USER;
+
+    // 이메일 인증 상태
+    @Column(nullable = false)
+    private boolean emailVerified = true; // signupToken 검증 후 생성이면 true
+
+    @Column
+    private Instant emailVerifiedAt;
 
     @CreatedDate
     @Column(nullable = false, updatable = false)

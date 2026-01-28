@@ -1,5 +1,6 @@
 package com.summat.summat.users.dto.users;
 
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -7,10 +8,9 @@ import lombok.Getter;
 
 @Getter
 public class UsersReqDto {
-    @Size(min = 4, max = 20, message = "아이디는 최소4자 부터 최대 20자 까지 입니다.")
-    @Pattern(regexp = "^[A-Za-z0-9]{4,20}$",
-            message = "아이디는 영문자, 숫자 섞어서 최대 20자 까지 입니다.")
-    @NotBlank(message = "아이디는 필수 입니다.")
+
+    @Email(message = "올바른 이메일 형식이 아닙니다.")
+    @NotBlank(message = "이메일은 필수 입니다.")
     private String userId;
 
     @Size(min = 8, max = 20, message = "비밀번호는 최소8자 부터 최대 20자 까지 입니다.")
