@@ -25,7 +25,7 @@ public class MyPageService {
                 .orElseThrow(() -> new IllegalArgumentException("유저 없음"));
 
         ProfileResDto profileResDto = new ProfileResDto();
-        profileResDto.setUserId(user.getUserId());
+        profileResDto.setUserId(user.getEmail());
         profileResDto.setNickName(user.getUserNickName());
         profileResDto.setCreatedAt(user.getCreatedAt());
 
@@ -45,7 +45,7 @@ public class MyPageService {
         if(newPassword.equals(getNewPasswordConfirm)) {
 
             Users userChange = new Users();
-            userChange.setUserId(user.getUserId());
+            userChange.setEmail(user.getEmail());
             userChange.setUserPw(passwordEncoder.encode(newPassword));
             userChange.setUserNickName(user.getUserNickName());
             userChange.setRole(RoleType.ROLE_USER);

@@ -14,9 +14,9 @@ public class RefreshTokenService {
     private final UsersRepository usersRepository;
 
     // 로그인 시 Refresh Token 저장/업데이트
-    public void saveRefreshToken(String userId, String refreshToken, Instant expiry) {
-        Users user = usersRepository.findByUserId(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
+    public void saveRefreshToken(String email, String refreshToken, Instant expiry) {
+        Users user = usersRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("User not found: " + email));
 
         user.setRefreshToken(refreshToken);
         user.setRefreshTokenExpiry(expiry);
@@ -24,9 +24,9 @@ public class RefreshTokenService {
     }
 
     // 재발급 요청 시 Refresh Token 검증
-    public boolean validateRefreshToken(String userId, String refreshToken) {
-        Users user = usersRepository.findByUserId(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
+    public boolean validateRefreshToken(String email, String refreshToken) {
+        Users user = usersRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("User not found: " + email));
 
         if (user.getRefreshToken() == null) return false;
         if (!user.getRefreshToken().equals(refreshToken)) return false;
@@ -37,9 +37,9 @@ public class RefreshTokenService {
     }
 
     // 로그아웃 시 Refresh Token 제거
-    public void clearRefreshToken(String userId) {
-        Users user = usersRepository.findByUserId(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
+    public void clearRefreshToken(String email) {
+        Users user = usersRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("User not found: " + email));
         user.setRefreshToken(null);
         user.setRefreshTokenExpiry(null);
         usersRepository.save(user);

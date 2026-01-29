@@ -50,7 +50,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             log.info("[JWT FILTER] token = " + token);
 
             if (jwtTokenProvider.validateToken(token)) {
-                log.info("[JWT FILTER] 토큰 유효 ✅");
+                log.info("[JWT FILTER] 토큰 유효");
 
                 String username = jwtTokenProvider.getUsername(token);
                 log.info("[JWT FILTER] username = " + username);

@@ -37,7 +37,7 @@ public class Users {
 
     // 이메일 인증 상태
     @Column(nullable = false)
-    private boolean emailVerified = true; // signupToken 검증 후 생성이면 true
+    private boolean emailVerified;
 
     @Column
     private Instant emailVerifiedAt;

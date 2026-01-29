@@ -51,6 +51,17 @@ public class EmailVerification {
     @Column(nullable = false, updatable = false)
     private Instant createdAt;
 
+    @Column(length = 2000)
+    private String signupToken;
+
+    // signupToken 만료시간
+    @Column
+    private Instant signupTokenExpiresAt;
+
+    // 1회성 소비 처리(사용된 시각)
+    @Column
+    private Instant consumedAt;
+
     public boolean isExpired(Instant now) {
         return expiresAt.isBefore(now);
     }
@@ -58,5 +69,6 @@ public class EmailVerification {
     public boolean isVerified() {
         return verifiedAt != null;
     }
+
 }
 

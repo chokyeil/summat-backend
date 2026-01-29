@@ -1,4 +1,4 @@
-package com.summat.summat.auth;
+package com.summat.summat.auth.controller;
 
 import com.summat.summat.auth.dto.LoginRequest;
 import com.summat.summat.auth.dto.LoginResponse;

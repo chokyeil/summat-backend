@@ -28,7 +28,7 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public String getUsername() {
-        return user.getUserId(); // 로그인 아이디로 쓰는 컬럼
+        return user.getEmail(); // 로그인 아이디로 쓰는 컬럼
     }
 
     @Override public boolean isAccountNonExpired() { return true; }

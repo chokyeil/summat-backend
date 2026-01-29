@@ -25,8 +25,8 @@ public class UsersController {
     private final UsersService usersService;
 
     @GetMapping("/id-check")
-    public ResponseEntity<ApiResponse> checkCurrentUserId(@RequestParam String userId) {
-        boolean isUserId = usersService.checkCurrentUserId(userId);
+    public ResponseEntity<ApiResponse> checkCurrentUserId(@RequestParam String email) {
+        boolean isUserId = usersService.checkCurrentEmail(email);
 
         return ResponseEntity.status(!isUserId ? ResponseCode.USERID_AVAILABLE.getHttpStatus() : ResponseCode.USERID_DUPLICATED.getHttpStatus())
                 .body(!isUserId ? new ApiResponse(ResponseCode.USERID_AVAILABLE, null) : new ApiResponse(ResponseCode.USERID_DUPLICATED, null));
@@ -35,7 +35,7 @@ public class UsersController {
 
     @PostMapping("/signup")
     public ResponseEntity<ApiResponse> signUp(@RequestBody @Valid UsersReqDto usersReqDto) {
-        log.info("UsersController signUp userId = " + usersReqDto.getUserId());
+        log.info("UsersController signUp getEmail = " + usersReqDto.getEmail());
         log.info("UsersController signUp userPw = " + usersReqDto.getUserPw());
         log.info("UsersController signUp userNickName = " + usersReqDto.getUserNickName());
 
