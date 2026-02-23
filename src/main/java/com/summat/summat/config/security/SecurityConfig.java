@@ -51,6 +51,10 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/places/detail/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/places/view/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/places/like/**").permitAll()
+                        // 댓글 목록은 비로그인도 조회 가능
+                        .requestMatchers(HttpMethod.GET, "/comments/**").permitAll()
+                        // 관리자 전용
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
 
                         // 정적 리소스 등도 필요하면 여기 permitAll
                         // .requestMatchers("/", "/index.html", "/static/**").permitAll()
