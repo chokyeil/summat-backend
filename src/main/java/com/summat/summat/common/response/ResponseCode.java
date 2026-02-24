@@ -33,12 +33,12 @@ public enum ResponseCode {
     EMAIL_SEND_SUCCESS(200, HttpStatus.OK, "이메일 인증번호 발송 성공"),
     EMAIL_VERIFY_SUCCESS(200, HttpStatus.OK, "이메일 인증 성공"),
 
-    // 댓글
-    COMMENT_CREATED(201, HttpStatus.CREATED, "댓글이 작성되었습니다."),
-    COMMENT_LIST_SUCCESS(200, HttpStatus.OK, "댓글 목록 조회 성공"),
-    COMMENT_UPDATED(200, HttpStatus.OK, "댓글이 수정되었습니다."),
-    COMMENT_DELETED(200, HttpStatus.OK, "댓글이 삭제되었습니다."),
-    COMMENT_NOT_FOUND(404, HttpStatus.NOT_FOUND, "댓글을 찾을 수 없습니다."),
+    // 댓글/대댓글
+    REPLY_CREATED(201, HttpStatus.CREATED, "댓글이 작성되었습니다."),
+    REPLY_LIST_SUCCESS(200, HttpStatus.OK, "댓글 목록 조회 성공"),
+    REPLY_UPDATED(200, HttpStatus.OK, "댓글이 수정되었습니다."),
+    REPLY_DELETED(200, HttpStatus.OK, "댓글이 삭제되었습니다."),
+    REPLY_NOT_FOUND(404, HttpStatus.NOT_FOUND, "댓글을 찾을 수 없습니다."),
 
     // 마이페이지
     PROFILE_SUCCESS(200, HttpStatus.OK, "프로필 조회 성공"),
@@ -49,9 +49,9 @@ public enum ResponseCode {
     ADMIN_USER_LIST_SUCCESS(200, HttpStatus.OK, "관리자 회원 목록 조회 성공"),
     ADMIN_USER_DETAIL_SUCCESS(200, HttpStatus.OK, "관리자 회원 상세 조회 성공"),
     ADMIN_USER_STATUS_CHANGED(200, HttpStatus.OK, "회원 상태가 변경되었습니다."),
-    ADMIN_COMMENT_LIST_SUCCESS(200, HttpStatus.OK, "관리자 댓글 목록 조회 성공"),
-    ADMIN_COMMENT_DELETED(200, HttpStatus.OK, "댓글이 삭제되었습니다. (관리자)"),
-    ADMIN_COMMENT_HIDDEN(200, HttpStatus.OK, "댓글이 숨김 처리되었습니다.");
+    ADMIN_REPLY_LIST_SUCCESS(200, HttpStatus.OK, "관리자 댓글 목록 조회 성공"),
+    ADMIN_REPLY_DELETED(200, HttpStatus.OK, "댓글이 삭제되었습니다. (관리자)"),
+    ADMIN_REPLY_HIDDEN(200, HttpStatus.OK, "댓글이 숨김 처리되었습니다.");
 
     private final int code;
     private final HttpStatus httpStatus;

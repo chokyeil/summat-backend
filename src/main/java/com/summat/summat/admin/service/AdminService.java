@@ -1,11 +1,11 @@
 package com.summat.summat.admin.service;
 
-import com.summat.summat.admin.dto.AdminCommentListResDto;
+import com.summat.summat.admin.dto.AdminReplyListResDto;
 import com.summat.summat.admin.dto.AdminUserDetailResDto;
 import com.summat.summat.admin.dto.AdminUserListResDto;
 import com.summat.summat.admin.dto.AdminUserStatusReqDto;
-import com.summat.summat.comments.entity.Comment;
-import com.summat.summat.comments.repository.CommentRepository;
+import com.summat.summat.reply.entity.Reply;
+import com.summat.summat.reply.repository.ReplyRepository;
 import com.summat.summat.users.entity.Users;
 import com.summat.summat.users.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 public class AdminService {
 
     private final UsersRepository usersRepository;
-    private final CommentRepository commentRepository;
+    private final ReplyRepository replyRepository;
 
     // 회원 목록 (페이징)
     @Transactional(readOnly = true)
@@ -48,26 +48,26 @@ public class AdminService {
 
     // 댓글 전체 목록
     @Transactional(readOnly = true)
-    public List<AdminCommentListResDto> getCommentList() {
-        return commentRepository.findAllByOrderByCreatedAtDesc()
+    public List<AdminReplyListResDto> getReplyList() {
+        return replyRepository.findAllByOrderByCreatedAtDesc()
                 .stream()
-                .map(AdminCommentListResDto::new)
+                .map(AdminReplyListResDto::new)
                 .collect(Collectors.toList());
     }
 
     // 댓글 soft delete
     @Transactional
-    public void deleteComment(Long commentId) {
-        Comment comment = commentRepository.findById(commentId)
+    public void deleteReply(Long replyId) {
+        Reply reply = replyRepository.findById(replyId)
                 .orElseThrow(() -> new IllegalArgumentException("댓글을 찾을 수 없습니다."));
-        comment.setDeleted(true);
+        reply.setDeleted(true);
     }
 
     // 댓글 숨김
     @Transactional
-    public void hideComment(Long commentId) {
-        Comment comment = commentRepository.findById(commentId)
+    public void hideReply(Long replyId) {
+        Reply reply = replyRepository.findById(replyId)
                 .orElseThrow(() -> new IllegalArgumentException("댓글을 찾을 수 없습니다."));
-        comment.setHidden(true);
+        reply.setHidden(true);
     }
 }

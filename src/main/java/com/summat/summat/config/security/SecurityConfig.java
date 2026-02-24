@@ -52,7 +52,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/places/view/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/places/like/**").permitAll()
                         // 댓글 목록은 비로그인도 조회 가능
-                        .requestMatchers(HttpMethod.GET, "/comments/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/reply/**").permitAll()
                         // 관리자 전용
                         .requestMatchers("/admin/**").hasRole("ADMIN")
 

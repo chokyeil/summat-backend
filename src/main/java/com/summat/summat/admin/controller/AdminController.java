@@ -1,6 +1,6 @@
 package com.summat.summat.admin.controller;
 
-import com.summat.summat.admin.dto.AdminCommentListResDto;
+import com.summat.summat.admin.dto.AdminReplyListResDto;
 import com.summat.summat.admin.dto.AdminUserDetailResDto;
 import com.summat.summat.admin.dto.AdminUserListResDto;
 import com.summat.summat.admin.dto.AdminUserStatusReqDto;
@@ -51,26 +51,26 @@ public class AdminController {
     }
 
     // 댓글 목록
-    @GetMapping("/comments")
-    public ResponseEntity<ApiResponse<List<AdminCommentListResDto>>> getCommentList() {
-        List<AdminCommentListResDto> result = adminService.getCommentList();
-        return ResponseEntity.status(ResponseCode.ADMIN_COMMENT_LIST_SUCCESS.getHttpStatus())
-                .body(new ApiResponse<>(ResponseCode.ADMIN_COMMENT_LIST_SUCCESS, result));
+    @GetMapping("/reply")
+    public ResponseEntity<ApiResponse<List<AdminReplyListResDto>>> getReplyList() {
+        List<AdminReplyListResDto> result = adminService.getReplyList();
+        return ResponseEntity.status(ResponseCode.ADMIN_REPLY_LIST_SUCCESS.getHttpStatus())
+                .body(new ApiResponse<>(ResponseCode.ADMIN_REPLY_LIST_SUCCESS, result));
     }
 
     // 댓글 삭제 (soft delete)
-    @DeleteMapping("/comments/{commentId}")
-    public ResponseEntity<ApiResponse<Void>> deleteComment(@PathVariable Long commentId) {
-        adminService.deleteComment(commentId);
-        return ResponseEntity.status(ResponseCode.ADMIN_COMMENT_DELETED.getHttpStatus())
-                .body(new ApiResponse<>(ResponseCode.ADMIN_COMMENT_DELETED, null));
+    @DeleteMapping("/reply/{replyId}")
+    public ResponseEntity<ApiResponse<Void>> deleteReply(@PathVariable Long replyId) {
+        adminService.deleteReply(replyId);
+        return ResponseEntity.status(ResponseCode.ADMIN_REPLY_DELETED.getHttpStatus())
+                .body(new ApiResponse<>(ResponseCode.ADMIN_REPLY_DELETED, null));
     }
 
     // 댓글 숨김
-    @PatchMapping("/comments/{commentId}/hide")
-    public ResponseEntity<ApiResponse<Void>> hideComment(@PathVariable Long commentId) {
-        adminService.hideComment(commentId);
-        return ResponseEntity.status(ResponseCode.ADMIN_COMMENT_HIDDEN.getHttpStatus())
-                .body(new ApiResponse<>(ResponseCode.ADMIN_COMMENT_HIDDEN, null));
+    @PatchMapping("/reply/{replyId}/hide")
+    public ResponseEntity<ApiResponse<Void>> hideReply(@PathVariable Long replyId) {
+        adminService.hideReply(replyId);
+        return ResponseEntity.status(ResponseCode.ADMIN_REPLY_HIDDEN.getHttpStatus())
+                .body(new ApiResponse<>(ResponseCode.ADMIN_REPLY_HIDDEN, null));
     }
 }
