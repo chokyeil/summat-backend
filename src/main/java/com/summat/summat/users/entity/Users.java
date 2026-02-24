@@ -2,6 +2,7 @@ package com.summat.summat.users.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.summat.summat.enums.RoleType;
+import com.summat.summat.enums.UserStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -34,6 +35,10 @@ public class Users {
     @Column(nullable = false, length = 15)
     @Enumerated(EnumType.STRING)
     private RoleType role = RoleType.ROLE_USER;
+
+    @Column(nullable = false, length = 15)
+    @Enumerated(EnumType.STRING)
+    private UserStatus status = UserStatus.ACTIVE;
 
     // 이메일 인증 상태
     @Column(nullable = false)
