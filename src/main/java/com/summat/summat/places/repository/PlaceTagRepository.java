@@ -12,6 +12,6 @@ import java.util.*;
 @Repository
 public interface PlaceTagRepository extends JpaRepository<PlaceTag, Long> {
 
-    @Query("SELECT pt.tagType FROM PlaceTag pt WHERE pt.place.id = :placeId")
+    @Query("SELECT pt.tag FROM PlaceTag pt WHERE pt.place.id = :placeId")
     List<PlaceTagType> findTagTypesByPlaceId(@Param("placeId") Long placeId);
 }

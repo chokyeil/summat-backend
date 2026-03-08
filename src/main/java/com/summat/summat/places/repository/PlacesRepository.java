@@ -25,11 +25,11 @@ public interface PlacesRepository extends JpaRepository<Places, Long> {
     @Query(value = "SELECT " +
                         "p.places_id            AS placesId, " +
                         "p.place_name           AS placeName, " +
-                        "p.place_image_url      AS placeImageUrl, " +
-                        "p.one_line_desc        AS oneLineDesc, " +
-                        "p.place_lot_address    AS placeLotAddress, " +
-                        "p.place_road_address   AS placeRoadAddress, " +
-                        "p.place_type           AS placeType, " +
+                        "p.place_image_url      AS imageUrl, " +
+                        "p.one_line_desc        AS summary, " +
+                        "p.place_lot_address    AS lotAddress, " +
+                        "p.place_road_address   AS roadAddress, " +
+                        "p.place_type           AS category, " +
                         "p.like_count           AS likeCount, " +
                         "p.view_count           AS viewCount," +
                         "p.created_at           AS createdAt " +
@@ -45,11 +45,11 @@ public interface PlacesRepository extends JpaRepository<Places, Long> {
     SELECT
         p.places_id          AS placesId,
         p.place_name         AS placeName,
-        p.place_image_url    AS placeImageUrl,
-        p.one_line_desc      AS oneLineDesc,
-        p.place_lot_address  AS placeLotAddress,
-        p.place_road_address AS placeRoadAddress,
-        p.place_type         AS placeType,
+        p.place_image_url    AS imageUrl,
+        p.one_line_desc      AS summary,
+        p.place_lot_address  AS lotAddress,
+        p.place_road_address AS roadAddress,
+        p.place_type         AS category,
         p.like_count         AS likeCount,
         p.view_count         AS viewCount,
         p.created_at         AS createdAt

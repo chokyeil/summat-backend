@@ -50,15 +50,13 @@ public class PlacesService {
 
     public boolean createdPlace(PlacesReqDto placesReqDto, MultipartFile image, Long userId) {
 
-
         Users user = usersRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("유저 없음"));
 
-
         log.info("placesReqDto.getPlaceName() = " + placesReqDto.getPlaceName());
-        log.info("placesReqDto.getPlaceLotAddress() = " + placesReqDto.getPlaceLotAddress());
-        log.info("placesReqDto.getPlaceRoadAddress() = " + placesReqDto.getPlaceRoadAddress());
-        if(placesReqDto.getPlaceName() == null || placesReqDto.getPlaceLotAddress() == null || placesReqDto.getPlaceRoadAddress() == null) {
+        log.info("placesReqDto.getLotAddress() = " + placesReqDto.getLotAddress());
+        log.info("placesReqDto.getRoadAddress() = " + placesReqDto.getRoadAddress());
+        if(placesReqDto.getPlaceName() == null || placesReqDto.getLotAddress() == null || placesReqDto.getRoadAddress() == null) {
             log.info("여기로 빠지니???!!!");
             return false;
         }
@@ -66,37 +64,34 @@ public class PlacesService {
         String imageUrl = savePlaceImage(image);
 
         Places place = new Places();
-        place.setPlaceName(placesReqDto.getPlaceName());
-        place.setPlaceLotAddress(placesReqDto.getPlaceLotAddress());
-        place.setPlaceRoadAddress(placesReqDto.getPlaceRoadAddress());
-        place.setPlaceDescription(placesReqDto.getPlaceDescription());
-        place.setPlaceImageUrl(imageUrl);
-        place.setOneLineDesc(placesReqDto.getOneLineDesc());
-        place.setPlaceType(placesReqDto.getPlaceType());
-        place.setPlaceRegion(placesReqDto.getPlaceRegion());
-        place.setUsers(user);
+        place.setName(placesReqDto.getPlaceName());
+        place.setLotAddress(placesReqDto.getLotAddress());
+        place.setRoadAddress(placesReqDto.getRoadAddress());
+        place.setDescription(placesReqDto.getDescription());
+        place.setImageUrl(imageUrl);
+        place.setSummary(placesReqDto.getSummary());
+        place.setCategory(placesReqDto.getCategory());
+        place.setRegion(placesReqDto.getRegion());
+        place.setCreatedBy(user);
 
+        if (placesReqDto.getTags() != null) {
+            for(String str : placesReqDto.getTags()) {
+                log.info("tag type = " + str);
+                PlaceTagType tagType = PlaceTagType.fromCode(str);
 
+                log.info("place tag type = " + tagType);
 
-        for(String str : placesReqDto.getTags()) {
-            log.info("tag type = " + str);
-            PlaceTagType tagType = PlaceTagType.fromCode(str);
+                PlaceTag placeTag = new PlaceTag();
+                placeTag.setPlace(place);
+                placeTag.setTag(tagType);
 
-            log.info("place tag type = " + tagType);
-
-
-            PlaceTag placeTag = new PlaceTag();
-            placeTag.setPlace(place);
-            placeTag.setTagType(tagType);
-
-            place.getPlaceTags().add(placeTag);
+                place.getTags().add(placeTag);
+            }
         }
 
         placesRepository.save(place);
 
         return true;
-
-
     }
 
     public PlaceListPageResDto getPlacesList(Pageable pageable) {
@@ -112,18 +107,17 @@ public class PlacesService {
 
             placeMainListResDto.setPlaceId(placesFindResponse.getPlacesId());
             placeMainListResDto.setPlaceName(placesFindResponse.getPlaceName());
-            placeMainListResDto.setPlaceImageUrl(placesFindResponse.getPlaceImageUrl());
-            placeMainListResDto.setOneLineDesc(placesFindResponse.getOneLineDesc());
-            placeMainListResDto.setPlaceLotAddress(placesFindResponse.getPlaceLotAddress());
-            placeMainListResDto.setPlaceRoadAddress(placesFindResponse.getPlaceRoadAddress());
+            placeMainListResDto.setImageUrl(placesFindResponse.getImageUrl());
+            placeMainListResDto.setSummary(placesFindResponse.getSummary());
+            placeMainListResDto.setLotAddress(placesFindResponse.getLotAddress());
+            placeMainListResDto.setRoadAddress(placesFindResponse.getRoadAddress());
+            placeMainListResDto.setCategory(placesFindResponse.getCategory());
             placeMainListResDto.setLikeCount(placesFindResponse.getLikeCount());
             placeMainListResDto.setViewCount(placesFindResponse.getViewCount());
             placeMainListResDto.setCreatedAt(placesFindResponse.getCreatedAt());
             placeMainListResDto.setTags(placeTags);
 
-
             placeMainListResDtoList.add(placeMainListResDto);
-
         }
 
         placeListPageResDto.setPlaceList(placeMainListResDtoList);
@@ -148,17 +142,19 @@ public class PlacesService {
 
         String imageUrl = savePlaceImage(image);
 
-        updatePlace.setPlaceName(placesReqDto.getPlaceName());
-        updatePlace.setPlaceLotAddress(placesReqDto.getPlaceLotAddress());
-        updatePlace.setPlaceRoadAddress(placesReqDto.getPlaceRoadAddress());
-        updatePlace.setPlaceDescription(placesReqDto.getPlaceDescription());
-        updatePlace.setPlaceImageUrl(imageUrl);
-        updatePlace.setOneLineDesc(placesReqDto.getOneLineDesc());
-        updatePlace.setPlaceType(placesReqDto.getPlaceType());
-        updatePlace.setPlaceRegion(placesReqDto.getPlaceRegion());
+        updatePlace.setName(placesReqDto.getPlaceName());
+        updatePlace.setLotAddress(placesReqDto.getLotAddress());
+        updatePlace.setRoadAddress(placesReqDto.getRoadAddress());
+        updatePlace.setDescription(placesReqDto.getDescription());
+        if (imageUrl != null) {
+            updatePlace.setImageUrl(imageUrl);
+        }
+        updatePlace.setSummary(placesReqDto.getSummary());
+        updatePlace.setCategory(placesReqDto.getCategory());
+        updatePlace.setRegion(placesReqDto.getRegion());
         updatePlace.setLikeCount(findByPlace.get().getLikeCount());
         updatePlace.setViewCount(findByPlace.get().getViewCount());
-        updatePlace.setUsers(user);
+        updatePlace.setCreatedBy(user);
 
         placesRepository.save(updatePlace);
 
@@ -180,20 +176,24 @@ public class PlacesService {
 
         Optional<Places> detailPlace = placesRepository.findById(placeId);
 
+        Places place = detailPlace.get();
         PlacesDetailResDto changeDetailPlace = new PlacesDetailResDto();
 
-        changeDetailPlace.setPlaceName(detailPlace.get().getPlaceName());
-        changeDetailPlace.setPlaceLotAddress(detailPlace.get().getPlaceLotAddress());
-        changeDetailPlace.setPlaceRoadAddress(detailPlace.get().getPlaceRoadAddress());
-        changeDetailPlace.setOneLineDesc(detailPlace.get().getOneLineDesc());
-        changeDetailPlace.setPlaceDescription(detailPlace.get().getPlaceDescription());
-        changeDetailPlace.setPlaceType(detailPlace.get().getPlaceType());
-        changeDetailPlace.setPlaceRegion(detailPlace.get().getPlaceRegion());
-        changeDetailPlace.setLikeCount(detailPlace.get().getLikeCount());
-        changeDetailPlace.setViewCount(detailPlace.get().getViewCount());
+        changeDetailPlace.setPlaceId(place.getId());
+        changeDetailPlace.setPlaceName(place.getName());
+        changeDetailPlace.setImageUrl(place.getImageUrl());
+        changeDetailPlace.setLotAddress(place.getLotAddress());
+        changeDetailPlace.setRoadAddress(place.getRoadAddress());
+        changeDetailPlace.setSummary(place.getSummary());
+        changeDetailPlace.setDescription(place.getDescription());
+        changeDetailPlace.setCategory(place.getCategory());
+        changeDetailPlace.setRegion(place.getRegion());
+        changeDetailPlace.setTags(placeTagRepository.findTagTypesByPlaceId(place.getId()));
+        changeDetailPlace.setLikeCount(place.getLikeCount());
+        changeDetailPlace.setViewCount(place.getViewCount());
+        changeDetailPlace.setCreatedAt(place.getCreatedAt());
 
         return changeDetailPlace;
-
     }
 
 
@@ -203,9 +203,7 @@ public class PlacesService {
 
         boolean isCreaseView = placesRepository.increaseViews(placeId);
 
-
         return isCreaseView;
-
     }
 
     public boolean toggleLike(Long userId, Long placeId) {
@@ -219,7 +217,6 @@ public class PlacesService {
         Optional<PlaceLike> isPlaceLikeId = placeLikeRepository.findByUserIdAndPlaceId(userId, placeId);
         boolean isPlaceLikeResult;
 
-
         if(isPlaceLikeId.isPresent()) {
             placeLikeRepository.delete(isPlaceLikeId.get());
             place.setLikeCount(place.getLikeCount() - 1);
@@ -231,7 +228,6 @@ public class PlacesService {
             place.setLikeCount(place.getLikeCount() + 1);
             placeLikeRepository.save(placeLike);
             isPlaceLikeResult = true;
-
         }
 
         return isPlaceLikeResult;
@@ -262,7 +258,6 @@ public class PlacesService {
 
         // FULLTEXT용 (boolean mode prefix 검색)
         String against = qEmpty ? "" : query.trim() + "*";
-
 
         // 1) tags 파싱(콤마 방어)
         List<String> flatTags = new ArrayList<>();
@@ -304,19 +299,17 @@ public class PlacesService {
 
             placeMainListResDto.setPlaceId(placesFindResponseProjection.getPlacesId());
             placeMainListResDto.setPlaceName(placesFindResponseProjection.getPlaceName());
-            placeMainListResDto.setPlaceImageUrl(placesFindResponseProjection.getPlaceImageUrl());
-            placeMainListResDto.setOneLineDesc(placesFindResponseProjection.getOneLineDesc());
-            placeMainListResDto.setPlaceLotAddress(placesFindResponseProjection.getPlaceLotAddress());
-            placeMainListResDto.setPlaceRoadAddress(placesFindResponseProjection.getPlaceRoadAddress());
-            placeMainListResDto.setPlaceType(placesFindResponseProjection.getPlaceType());
+            placeMainListResDto.setImageUrl(placesFindResponseProjection.getImageUrl());
+            placeMainListResDto.setSummary(placesFindResponseProjection.getSummary());
+            placeMainListResDto.setLotAddress(placesFindResponseProjection.getLotAddress());
+            placeMainListResDto.setRoadAddress(placesFindResponseProjection.getRoadAddress());
+            placeMainListResDto.setCategory(placesFindResponseProjection.getCategory());
             placeMainListResDto.setLikeCount(placesFindResponseProjection.getLikeCount());
             placeMainListResDto.setViewCount(placesFindResponseProjection.getViewCount());
             placeMainListResDto.setCreatedAt(placesFindResponseProjection.getCreatedAt());
             placeMainListResDto.setTags(placeTags);
 
-
             placeMainListResDtoList.add(placeMainListResDto);
-
         }
 
         placeListPageResDto.setPlaceList(placeMainListResDtoList);

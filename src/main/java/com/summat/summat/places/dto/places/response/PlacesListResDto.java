@@ -1,6 +1,5 @@
 package com.summat.summat.places.dto.places.response;
 
-import lombok.Data;
 import lombok.Getter;
 
 @Getter
@@ -9,13 +8,13 @@ public class PlacesListResDto {
 
     private String placeDetailAddress;
 
-    private String placeImageUrl;
+    private String imageUrl;
 
-    private String oneLineDesc;
+    private String summary;
 
-    private String placeType;
+    private String category;
 
-    private String placeRegion;
+    private String region;
 
     private long likeCount;
 

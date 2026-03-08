@@ -15,11 +15,11 @@ import java.util.List;
 public class PlaceMainListResDto {
     private Long placeId;
     private String placeName;
-    private String placeLotAddress;
-    private String placeRoadAddress;
-    private String placeType;
-    private String placeImageUrl;
-    private String oneLineDesc;
+    private String lotAddress;
+    private String roadAddress;
+    private String category;
+    private String imageUrl;
+    private String summary;
     private List<PlaceTagType> tags;
     private long likeCount;
     private long viewCount;

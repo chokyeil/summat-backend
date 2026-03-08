@@ -18,6 +18,6 @@ public class PlaceTag {
     private Places place;
 
     @Enumerated(EnumType.STRING)
-    @Column(name="tag_type", nullable=false)
-    private PlaceTagType tagType;
+    @Column(name = "tag_type", nullable = false)
+    private PlaceTagType tag;
 }

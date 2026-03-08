@@ -37,12 +37,12 @@ public class PlaceQueryRepositoryImpl implements PlaceQueryRepository{
                 .select(Projections.constructor(
                         PlacesFindResponseDto.class,
                         p.id,                 // placeId
-                        p.placeName,
-                        p.placeImageUrl,
-                        p.oneLineDesc,
-                        p.placeLotAddress,
-                        p.placeRoadAddress,
-                        p.placeType,
+                        p.name,
+                        p.imageUrl,
+                        p.summary,
+                        p.lotAddress,
+                        p.roadAddress,
+                        p.category,
                         p.likeCount,
                         p.viewCount,
                         p.createdAt
@@ -71,18 +71,18 @@ public class PlaceQueryRepositoryImpl implements PlaceQueryRepository{
         if (q == null || q.trim().isEmpty()) return null;
         String qq = q.trim();
 
-        return p.placeName.coalesce("").containsIgnoreCase(qq)
-                .or(p.oneLineDesc.coalesce("").containsIgnoreCase(qq))
-                .or(p.placeDescription.coalesce("").containsIgnoreCase(qq));
+        return p.name.coalesce("").containsIgnoreCase(qq)
+                .or(p.summary.coalesce("").containsIgnoreCase(qq))
+                .or(p.description.coalesce("").containsIgnoreCase(qq));
     }
 
     private BooleanExpression regionIn(QPlaces p, List<String> regions) {
         if (CollectionUtils.isEmpty(regions)) return null; // 조건 제거
-        return p.placeRegion.in(regions);
+        return p.region.in(regions);
     }
 
     private BooleanExpression typeIn(QPlaces p, List<String> types) {
         if (CollectionUtils.isEmpty(types)) return null; // 조건 제거
-        return p.placeType.in(types);
+        return p.category.in(types);
     }
 }

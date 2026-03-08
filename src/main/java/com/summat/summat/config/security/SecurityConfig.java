@@ -56,7 +56,8 @@ public class SecurityConfig {
                         // 관리자 전용
                         .requestMatchers("/admin/**").hasRole("ADMIN")
 
-                        // 정적 리소스 등도 필요하면 여기 permitAll
+                        // 정적 리소스
+                        .requestMatchers(HttpMethod.GET, "/uploads/**").permitAll()
                         // .requestMatchers("/", "/index.html", "/static/**").permitAll()
                         // 나머지는 인증 필요
                         .anyRequest().authenticated()
@@ -75,7 +76,7 @@ public class SecurityConfig {
 
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
-        config.setAllowedOriginPatterns(List.of("http://localhost:3000", "http://127.0.0.1:3000"));
+        config.setAllowedOriginPatterns(List.of("http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:5173", "http://127.0.0.1:5173"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setExposedHeaders(List.of("Authorization"));

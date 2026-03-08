@@ -5,11 +5,11 @@ import java.time.Instant;
 public interface PlacesFindResponseProjection {
     Long getPlacesId();
     String getPlaceName();
-    String getPlaceImageUrl();
-    String getOneLineDesc();
-    String getPlaceLotAddress();
-    String getPlaceRoadAddress();
-    String getPlaceType();
+    String getImageUrl();
+    String getSummary();
+    String getLotAddress();
+    String getRoadAddress();
+    String getCategory();
     Long getLikeCount();
     Long getViewCount();
     Instant getCreatedAt();

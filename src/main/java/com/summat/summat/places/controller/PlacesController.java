@@ -38,7 +38,7 @@ public class PlacesController {
 
 
         log.info("placesReqDto.getPlaceName() = " + placesReqDto.getPlaceName());
-        log.info("placesReqDto.getPlaceLotAddress() = " + placesReqDto.getPlaceLotAddress());
+        log.info("placesReqDto.getLotAddress() = " + placesReqDto.getLotAddress());
 
         boolean isCreated = placesService.createdPlace(placesReqDto, image, userId);
 
@@ -56,8 +56,8 @@ public class PlacesController {
                              .body(new ApiResponse(ResponseCode.PLACE_LIST_SUCCESS, resultData));
     }
 
-    @PutMapping("/update/{placeId}")
-    public ResponseEntity<ApiResponse> updatePlace(@RequestBody PlacesReqDto placesReqDto,
+    @PutMapping(value = "/update/{placeId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ApiResponse> updatePlace(@ModelAttribute @Valid PlacesReqDto placesReqDto,
                                                @AuthenticationPrincipal CustomUserDetails userDetails,
                                                @RequestPart(value = "image", required = false) MultipartFile image,
                                                @PathVariable(name = "placeId") Long placeId) {
@@ -88,7 +88,7 @@ public class PlacesController {
         PlacesDetailResDto detailPlaceResult = placesService.detailPlace(placeId);
 
         return ResponseEntity.status(detailPlaceResult != null ? ResponseCode.PLACE_DETAIL_SUCCESS.getHttpStatus() : ResponseCode.PLACE_NOT_FOUND.getHttpStatus())
-                .body(detailPlaceResult != null ? new ApiResponse(ResponseCode.PLACE_DETAIL_SUCCESS, null) : new ApiResponse(ResponseCode.PLACE_NOT_FOUND, null));
+                .body(detailPlaceResult != null ? new ApiResponse(ResponseCode.PLACE_DETAIL_SUCCESS, detailPlaceResult) : new ApiResponse(ResponseCode.PLACE_NOT_FOUND, null));
     }
 
     @PostMapping("/view/{placeId}")
