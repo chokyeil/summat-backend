@@ -115,13 +115,13 @@ public class PlacesController {
     @GetMapping("/search")
     public ResponseEntity<ApiResponse> searchSummatList(Pageable pageable,
                                                         @RequestParam(name = "q", required = false) String query,
-                                                        @RequestParam(name = "region", required = false) List<String> region,
-                                                        @RequestParam(name = "type", required = false) List<String> type,
+                                                        @RequestParam(name = "categories", required = false) List<String> categories,
+                                                        @RequestParam(name = "regions", required = false) List<String> regions,
                                                         @RequestParam(name = "tags", required = false) List<String> tags) {
 
         log.info("q='{}'", query);
 
-        PlaceListPageResDto searchResult = placesService.searchSummatList(pageable, query, region, type, tags);
+        PlaceListPageResDto searchResult = placesService.searchSummatList(pageable, query, categories, regions, tags);
 
 
 

@@ -243,21 +243,21 @@ public class PlacesService {
 
     public PlaceListPageResDto searchSummatList(Pageable pageable,
                                                 String query,
-                                                List<String> region,
-                                                List<String> type,
+                                                List<String> categories,
+                                                List<String> regions,
                                                 List<String> tags) {
 
-        List<String> regionsParam = (region == null || region.isEmpty())
+        List<String> regionsParam = (regions == null || regions.isEmpty())
                 ? List.of("__DUMMY__")   // 절대 존재하지 않을 값
-                : region;
+                : regions;
 
-        boolean regionEmpty = (region == null || region.isEmpty());
+        boolean regionEmpty = (regions == null || regions.isEmpty());
 
-        List<String> typesParam = (type == null || type.isEmpty())
+        List<String> categoriesParam = (categories == null || categories.isEmpty())
                 ? List.of("__DUMMY__")
-                : type;
+                : categories;
 
-        boolean typeEmpty = (type == null || type.isEmpty());
+        boolean categoryEmpty = (categories == null || categories.isEmpty());
 
         boolean qEmpty = (query == null || query.isBlank());
 
@@ -278,23 +278,27 @@ public class PlacesService {
             }
         }
 
-        // 2) tagTypes: 없으면 null
-        List<PlaceTagType> tagTypes = null;
-        if (!flatTags.isEmpty()) {
-            tagTypes = new ArrayList<>();
+        // 2) tagNames: DB에 ENUM STRING(대문자)으로 저장되므로 name()으로 변환
+        boolean tagsEmpty = flatTags.isEmpty();
+        List<String> tagNamesParam = new ArrayList<>();
+        if (!tagsEmpty) {
             for (String tag : flatTags) {
-                tagTypes.add(PlaceTagType.fromCode(tag));
+                tagNamesParam.add(PlaceTagType.fromCode(tag).name());
             }
+        } else {
+            tagNamesParam.add("__DUMMY__");
         }
-//        Page<PlacesFindResponseDto> result = placeQueryRepository.findMainList(query, region, type, pageable);
+
         Page<PlacesFindResponseProjection> placesFindResponseList = placesRepository.searchPlacesUnified(
                         qEmpty,
                         qPrefix,
                         against,
                         regionsParam,
                         regionEmpty,
-                        typesParam,
-                        typeEmpty,
+                        categoriesParam,
+                        categoryEmpty,
+                        tagNamesParam,
+                        tagsEmpty,
                         pageable
                 );
 

@@ -62,7 +62,10 @@ public interface PlacesRepository extends JpaRepository<Places, Long> {
            AGAINST (:against IN BOOLEAN MODE)
       )
       AND (:regionEmpty = true OR p.place_region IN (:regions))
-      AND (:typeEmpty = true OR p.place_type IN (:types))
+      AND (:categoryEmpty = true OR p.place_type IN (:categories))
+      AND (:tagsEmpty = true OR p.places_id IN (
+          SELECT pt.place_id FROM place_tag pt WHERE pt.tag_type IN (:tagNames)
+      ))
     ORDER BY p.created_at DESC
   """,
             countQuery = """
@@ -76,7 +79,10 @@ public interface PlacesRepository extends JpaRepository<Places, Long> {
            AGAINST (:against IN BOOLEAN MODE)
       )
       AND (:regionEmpty = true OR p.place_region IN (:regions))
-      AND (:typeEmpty = true OR p.place_type IN (:types))
+      AND (:categoryEmpty = true OR p.place_type IN (:categories))
+      AND (:tagsEmpty = true OR p.places_id IN (
+          SELECT pt.place_id FROM place_tag pt WHERE pt.tag_type IN (:tagNames)
+      ))
   """,
             nativeQuery = true
     )
@@ -86,8 +92,10 @@ public interface PlacesRepository extends JpaRepository<Places, Long> {
             @Param("against") String against,
             @Param("regions") List<String> regions,
             @Param("regionEmpty") boolean regionEmpty,
-            @Param("types") List<String> types,
-            @Param("typeEmpty") boolean typeEmpty,
+            @Param("categories") List<String> categories,
+            @Param("categoryEmpty") boolean categoryEmpty,
+            @Param("tagNames") List<String> tagNames,
+            @Param("tagsEmpty") boolean tagsEmpty,
             Pageable pageable
     );
 
