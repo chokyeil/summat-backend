@@ -130,15 +130,14 @@ public class PlacesService {
         return placeListPageResDto;
     }
 
+    @Transactional
     public boolean updatePlace(PlacesReqDto placesReqDto, MultipartFile image, Long userId, Long placeId) {
         Users user = usersRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("유저 없음"));
 
-        Optional<Places> findByPlace = placesRepository.findById(placeId);
+        Places updatePlace = placesRepository.findById(placeId).orElse(null);
 
-        Places updatePlace = findByPlace.orElseThrow(null);
-
-        if(updatePlace == null) return false;
+        if (updatePlace == null) return false;
 
         String imageUrl = savePlaceImage(image);
 
@@ -152,9 +151,18 @@ public class PlacesService {
         updatePlace.setSummary(placesReqDto.getSummary());
         updatePlace.setCategory(placesReqDto.getCategory());
         updatePlace.setRegion(placesReqDto.getRegion());
-        updatePlace.setLikeCount(findByPlace.get().getLikeCount());
-        updatePlace.setViewCount(findByPlace.get().getViewCount());
         updatePlace.setCreatedBy(user);
+
+        if (placesReqDto.getTags() != null) {
+            updatePlace.getTags().clear();
+            for (String str : placesReqDto.getTags()) {
+                PlaceTagType tagType = PlaceTagType.fromCode(str);
+                PlaceTag placeTag = new PlaceTag();
+                placeTag.setPlace(updatePlace);
+                placeTag.setTag(tagType);
+                updatePlace.getTags().add(placeTag);
+            }
+        }
 
         placesRepository.save(updatePlace);
 
