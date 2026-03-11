@@ -1,7 +1,10 @@
 package com.summat.summat.users.service;
 
 import com.summat.summat.enums.RoleType;
+import com.summat.summat.places.entity.Places;
+import com.summat.summat.places.repository.PlacesRepository;
 import com.summat.summat.users.CustomUserDetails;
+import com.summat.summat.users.dto.mypage.MyPlaceResDto;
 import com.summat.summat.users.dto.mypage.PasswordChangeReqDto;
 import com.summat.summat.users.dto.mypage.ProfileResDto;
 import com.summat.summat.users.entity.Users;
@@ -17,6 +20,7 @@ import java.util.*;
 public class MyPageService {
     private final UsersRepository usersRepository;
     private final PasswordEncoder passwordEncoder;
+    private final PlacesRepository placesRepository;
 
     public ProfileResDto getMyProfile(CustomUserDetails userDetails) {
         Long userId = userDetails.getUser().getId();
@@ -31,6 +35,25 @@ public class MyPageService {
 
         return profileResDto;
 
+    }
+
+    public List<MyPlaceResDto> getMyPlaces(CustomUserDetails userDetails) {
+        Long userId = userDetails.getUser().getId();
+        List<Places> places = placesRepository.findByCreatedBy_IdOrderByCreatedAtDesc(userId);
+
+        List<MyPlaceResDto> result = new ArrayList<>();
+        for (Places place : places) {
+            MyPlaceResDto dto = new MyPlaceResDto();
+            dto.setPlaceId(place.getId());
+            dto.setPlaceName(place.getName());
+            dto.setImageUrl(place.getImageUrl());
+            dto.setSummary(place.getSummary());
+            dto.setCategory(place.getCategory());
+            dto.setRegion(place.getRegion());
+            dto.setCreatedAt(place.getCreatedAt());
+            result.add(dto);
+        }
+        return result;
     }
 
     public boolean changePassword(CustomUserDetails userDetails, PasswordChangeReqDto passwordChangeReqDto) {

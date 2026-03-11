@@ -18,6 +18,9 @@ import java.util.List;
 @Repository
 public interface PlacesRepository extends JpaRepository<Places, Long> {
 
+    // 마이페이지: 특정 사용자가 등록한 장소 목록 (최신순)
+    List<Places> findByCreatedBy_IdOrderByCreatedAtDesc(Long userId);
+
     @Modifying
     @Query("UPDATE Places p SET p.viewCount = p.viewCount + 1 WHERE p.id = :placeId")
     boolean increaseViews(@Param("placeId") Long placeId);
