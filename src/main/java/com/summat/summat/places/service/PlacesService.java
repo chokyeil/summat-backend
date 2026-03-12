@@ -2,8 +2,10 @@ package com.summat.summat.places.service;
 
 import com.summat.summat.enums.PlaceTagType;
 import com.summat.summat.places.dto.places.response.PlaceListPageResDto;
+import com.summat.summat.places.dto.places.response.PlaceLikeResDto;
 import com.summat.summat.places.dto.places.response.PlaceMainListResDto;
 import com.summat.summat.places.dto.places.response.PlacesDetailResDto;
+import com.summat.summat.places.dto.places.response.PlaceViewResDto;
 import com.summat.summat.places.dto.places.request.PlacesReqDto;
 import com.summat.summat.places.dto.places.response.PlacesFindResponseDto;
 import com.summat.summat.places.entity.PlaceLike;
@@ -14,6 +16,7 @@ import com.summat.summat.places.repository.PlaceQueryRepository;
 import com.summat.summat.places.repository.PlaceTagRepository;
 import com.summat.summat.places.repository.PlacesRepository;
 import com.summat.summat.places.repository.dto.PlacesFindResponseProjection;
+import com.summat.summat.reply.repository.ReplyRepository;
 import com.summat.summat.users.entity.Users;
 import com.summat.summat.users.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
@@ -31,8 +34,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -47,6 +52,7 @@ public class PlacesService {
     private final PlaceLikeRepository placeLikeRepository;
     private final PlaceTagRepository placeTagRepository;
     private final PlaceQueryRepository placeQueryRepository;
+    private final ReplyRepository replyRepository;
 
     public boolean createdPlace(PlacesReqDto placesReqDto, MultipartFile image, Long userId) {
 
@@ -94,9 +100,11 @@ public class PlacesService {
         return true;
     }
 
-    public PlaceListPageResDto getPlacesList(Pageable pageable) {
+    public PlaceListPageResDto getPlacesList(Pageable pageable, Long userId) {
 
         Page<PlacesFindResponseProjection> placesFindResponseList = placesRepository.findMainList(pageable);
+
+        Set<Long> likedPlaceIds = getLikedPlaceIds(userId);
 
         List<PlaceMainListResDto> placeMainListResDtoList = new ArrayList<>();
         PlaceListPageResDto placeListPageResDto = new PlaceListPageResDto();
@@ -113,6 +121,7 @@ public class PlacesService {
             placeMainListResDto.setRoadAddress(placesFindResponse.getRoadAddress());
             placeMainListResDto.setCategory(placesFindResponse.getCategory());
             placeMainListResDto.setLikeCount(placesFindResponse.getLikeCount());
+            placeMainListResDto.setLiked(likedPlaceIds.contains(placesFindResponse.getPlacesId()));
             placeMainListResDto.setViewCount(placesFindResponse.getViewCount());
             placeMainListResDto.setCreatedAt(placesFindResponse.getCreatedAt());
             placeMainListResDto.setTags(placeTags);
@@ -169,22 +178,31 @@ public class PlacesService {
         return true;
     }
 
+    @Transactional
     public boolean removePlace(Long userId, Long placeId) {
-        Users user = usersRepository.findById(userId)
+        usersRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("유저 없음"));
 
-        if(!placesRepository.existsById(placeId)) return false;
+        Places place = placesRepository.findById(placeId).orElse(null);
+        if (place == null) return false;
+
+        if (!place.getCreatedBy().getId().equals(userId)) {
+            throw new IllegalArgumentException("본인이 등록한 장소만 삭제할 수 있습니다.");
+        }
+
+        // reply FK constraint 방지: 자식 댓글(depth=1) → 부모 댓글(depth=0) 순으로 삭제
+        replyRepository.deleteChildRepliesByPlaceId(placeId);
+        replyRepository.deleteParentRepliesByPlaceId(placeId);
 
         placesRepository.deleteById(placeId);
 
         return true;
     }
 
-    public PlacesDetailResDto detailPlace(Long placeId) {
+    public PlacesDetailResDto detailPlace(Long placeId, Long userId) {
 
-        Optional<Places> detailPlace = placesRepository.findById(placeId);
-
-        Places place = detailPlace.get();
+        Places place = placesRepository.findById(placeId).orElse(null);
+        if (place == null) return null;
         PlacesDetailResDto changeDetailPlace = new PlacesDetailResDto();
 
         changeDetailPlace.setPlaceId(place.getId());
@@ -198,6 +216,7 @@ public class PlacesService {
         changeDetailPlace.setRegion(place.getRegion());
         changeDetailPlace.setTags(placeTagRepository.findTagTypesByPlaceId(place.getId()));
         changeDetailPlace.setLikeCount(place.getLikeCount());
+        changeDetailPlace.setLiked(userId != null && placeLikeRepository.findByUserIdAndPlaceId(userId, placeId).isPresent());
         changeDetailPlace.setViewCount(place.getViewCount());
         changeDetailPlace.setCreatedAt(place.getCreatedAt());
 
@@ -206,46 +225,44 @@ public class PlacesService {
 
 
     @Transactional
-    public boolean increaseView(Long placeId) {
-        Places place = placesRepository.findById(placeId).orElseThrow(() -> new IllegalArgumentException("not found place"));
-
-        boolean isCreaseView = placesRepository.increaseViews(placeId);
-
-        return isCreaseView;
+    public PlaceViewResDto increaseView(Long placeId) {
+        Places place = placesRepository.findById(placeId)
+                .orElseThrow(() -> new IllegalArgumentException("장소를 찾을 수 없습니다."));
+        placesRepository.increaseViews(placeId);
+        return new PlaceViewResDto(place.getViewCount() + 1);
     }
 
-    public boolean toggleLike(Long userId, Long placeId) {
+    @Transactional
+    public PlaceLikeResDto toggleLike(Long userId, Long placeId) {
 
-//        Users user = usersRepository.findById(userId)
-//                .orElseThrow(() -> new IllegalArgumentException("유저 없음"));
-//
         Places place = placesRepository.findById(placeId)
                 .orElseThrow(() -> new IllegalArgumentException("장소 없음"));
 
         Optional<PlaceLike> isPlaceLikeId = placeLikeRepository.findByUserIdAndPlaceId(userId, placeId);
-        boolean isPlaceLikeResult;
+        boolean liked;
 
         if(isPlaceLikeId.isPresent()) {
             placeLikeRepository.delete(isPlaceLikeId.get());
             place.setLikeCount(place.getLikeCount() - 1);
-            isPlaceLikeResult = false;
+            liked = false;
         } else {
             PlaceLike placeLike = new PlaceLike();
             placeLike.setUserId(userId);
             placeLike.setPlaceId(placeId);
             place.setLikeCount(place.getLikeCount() + 1);
             placeLikeRepository.save(placeLike);
-            isPlaceLikeResult = true;
+            liked = true;
         }
 
-        return isPlaceLikeResult;
+        return new PlaceLikeResDto(liked, place.getLikeCount());
     }
 
     public PlaceListPageResDto searchSummatList(Pageable pageable,
                                                 String query,
                                                 List<String> categories,
                                                 List<String> regions,
-                                                List<String> tags) {
+                                                List<String> tags,
+                                                Long userId) {
 
         List<String> regionsParam = (regions == null || regions.isEmpty())
                 ? List.of("__DUMMY__")   // 절대 존재하지 않을 값
@@ -302,6 +319,8 @@ public class PlacesService {
                         pageable
                 );
 
+        Set<Long> likedPlaceIds = getLikedPlaceIds(userId);
+
         List<PlaceMainListResDto> placeMainListResDtoList = new ArrayList<>();
         PlaceListPageResDto placeListPageResDto = new PlaceListPageResDto();
 
@@ -317,6 +336,7 @@ public class PlacesService {
             placeMainListResDto.setRoadAddress(placesFindResponseProjection.getRoadAddress());
             placeMainListResDto.setCategory(placesFindResponseProjection.getCategory());
             placeMainListResDto.setLikeCount(placesFindResponseProjection.getLikeCount());
+            placeMainListResDto.setLiked(likedPlaceIds.contains(placesFindResponseProjection.getPlacesId()));
             placeMainListResDto.setViewCount(placesFindResponseProjection.getViewCount());
             placeMainListResDto.setCreatedAt(placesFindResponseProjection.getCreatedAt());
             placeMainListResDto.setTags(placeTags);
@@ -334,6 +354,15 @@ public class PlacesService {
         return placeListPageResDto;
     }
 
+
+    private Set<Long> getLikedPlaceIds(Long userId) {
+        if (userId == null) return new HashSet<>();
+        Set<Long> ids = new HashSet<>();
+        for (PlaceLike like : placeLikeRepository.findByUserId(userId)) {
+            ids.add(like.getPlaceId());
+        }
+        return ids;
+    }
 
     private String savePlaceImage(MultipartFile image) {
         log.info("savePlaceImage 진입!!");

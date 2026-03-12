@@ -2,8 +2,10 @@ package com.summat.summat.places.controller;
 
 import com.summat.summat.common.response.ApiResponse;
 import com.summat.summat.common.response.ResponseCode;
+import com.summat.summat.places.dto.places.response.PlaceLikeResDto;
 import com.summat.summat.places.dto.places.response.PlaceListPageResDto;
 import com.summat.summat.places.dto.places.response.PlacesDetailResDto;
+import com.summat.summat.places.dto.places.response.PlaceViewResDto;
 import com.summat.summat.places.dto.places.request.PlacesReqDto;
 import com.summat.summat.places.service.PlacesService;
 import com.summat.summat.users.CustomUserDetails;
@@ -47,10 +49,10 @@ public class PlacesController {
     }
 
     @GetMapping("/list")
-    public ResponseEntity<ApiResponse> boardList(Pageable pageable) {
-
-        PlaceListPageResDto resultData = placesService.getPlacesList(pageable);
-
+    public ResponseEntity<ApiResponse> boardList(Pageable pageable,
+                                                 @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long userId = userDetails != null ? userDetails.getUser().getId() : null;
+        PlaceListPageResDto resultData = placesService.getPlacesList(pageable, userId);
 
         return ResponseEntity.status(ResponseCode.PLACE_LIST_SUCCESS.getHttpStatus())
                              .body(new ApiResponse(ResponseCode.PLACE_LIST_SUCCESS, resultData));
@@ -82,10 +84,10 @@ public class PlacesController {
     }
 
     @GetMapping("/detail/{placeId}")
-    public ResponseEntity<ApiResponse> detailPlace(@PathVariable(name = "placeId") Long placeId) {
-
-
-        PlacesDetailResDto detailPlaceResult = placesService.detailPlace(placeId);
+    public ResponseEntity<ApiResponse> detailPlace(@PathVariable(name = "placeId") Long placeId,
+                                                   @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long userId = userDetails != null ? userDetails.getUser().getId() : null;
+        PlacesDetailResDto detailPlaceResult = placesService.detailPlace(placeId, userId);
 
         return ResponseEntity.status(detailPlaceResult != null ? ResponseCode.PLACE_DETAIL_SUCCESS.getHttpStatus() : ResponseCode.PLACE_NOT_FOUND.getHttpStatus())
                 .body(detailPlaceResult != null ? new ApiResponse(ResponseCode.PLACE_DETAIL_SUCCESS, detailPlaceResult) : new ApiResponse(ResponseCode.PLACE_NOT_FOUND, null));
@@ -93,11 +95,9 @@ public class PlacesController {
 
     @PostMapping("/view/{placeId}")
     public ResponseEntity<ApiResponse> increaseView(@PathVariable(name = "placeId") Long placeId) {
-
-        boolean isCreaseView = placesService.increaseView(placeId);
-
-        return ResponseEntity.status(isCreaseView ? ResponseCode.PLACE_VIEW_INCREMENTED.getHttpStatus() : ResponseCode.PLACE_NOT_FOUND.getHttpStatus())
-                .body(isCreaseView ? new ApiResponse(ResponseCode.PLACE_DETAIL_SUCCESS, null) : new ApiResponse(ResponseCode.PLACE_NOT_FOUND, null));
+        PlaceViewResDto result = placesService.increaseView(placeId);
+        return ResponseEntity.status(ResponseCode.PLACE_VIEW_INCREMENTED.getHttpStatus())
+                .body(new ApiResponse(ResponseCode.PLACE_VIEW_INCREMENTED, result));
     }
 
     @PostMapping("/like/{placeId}")
@@ -105,10 +105,11 @@ public class PlacesController {
                                               @PathVariable(name = "placeId") Long placeId) {
         Long userId = userDetails.getUser().getId();
 
-        boolean isPlaceLike = placesService.toggleLike(userId, placeId);
+        PlaceLikeResDto result = placesService.toggleLike(userId, placeId);
+        ResponseCode code = result.isLiked() ? ResponseCode.PLACE_LIKE_SUCCESS : ResponseCode.PLACE_LIKE_CANCELLED;
 
-        return ResponseEntity.status(isPlaceLike ? ResponseCode.PLACE_LIKE_SUCCESS.getHttpStatus() : ResponseCode.PLACE_NOT_FOUND.getHttpStatus())
-                .body(isPlaceLike ? new ApiResponse(ResponseCode.PLACE_LIKE_SUCCESS, null) : new ApiResponse(ResponseCode.PLACE_NOT_FOUND, null));
+        return ResponseEntity.status(code.getHttpStatus())
+                .body(new ApiResponse(code, result));
     }
 
     // 복합 조건 조회
@@ -117,11 +118,13 @@ public class PlacesController {
                                                         @RequestParam(name = "q", required = false) String query,
                                                         @RequestParam(name = "categories", required = false) List<String> categories,
                                                         @RequestParam(name = "regions", required = false) List<String> regions,
-                                                        @RequestParam(name = "tags", required = false) List<String> tags) {
+                                                        @RequestParam(name = "tags", required = false) List<String> tags,
+                                                        @AuthenticationPrincipal CustomUserDetails userDetails) {
 
         log.info("q='{}'", query);
+        Long userId = userDetails != null ? userDetails.getUser().getId() : null;
 
-        PlaceListPageResDto searchResult = placesService.searchSummatList(pageable, query, categories, regions, tags);
+        PlaceListPageResDto searchResult = placesService.searchSummatList(pageable, query, categories, regions, tags, userId);
 
 
 

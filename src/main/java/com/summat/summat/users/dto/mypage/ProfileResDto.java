@@ -8,6 +8,7 @@ import java.time.Instant;
 @Getter
 @Setter
 public class ProfileResDto {
+    private Long id;
     private String userId;
     private String nickName;
     private Instant createdAt;

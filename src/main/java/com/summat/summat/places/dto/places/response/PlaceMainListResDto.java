@@ -22,6 +22,7 @@ public class PlaceMainListResDto {
     private String summary;
     private List<PlaceTagType> tags;
     private long likeCount;
+    private boolean liked;
     private long viewCount;
     private Instant createdAt;
 

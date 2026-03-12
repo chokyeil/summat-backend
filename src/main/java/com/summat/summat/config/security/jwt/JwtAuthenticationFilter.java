@@ -65,7 +65,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                 userDetails.getAuthorities()
                         );
 
+                log.info("[JWT FILTER] authentication created = {}", authToken);
+
                 SecurityContextHolder.getContext().setAuthentication(authToken);
+
+                log.info("[JWT FILTER] SecurityContext authentication = {}",
+                        SecurityContextHolder.getContext().getAuthentication());
             } else {
                 log.info("[JWT FILTER] 토큰 유효하지 않음");
             }
@@ -73,6 +78,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             log.info("[JWT FILTER] Authorization 헤더 없음 또는 Bearer 아님");
         }
 
+        log.info("[JWT FILTER] filterChain.doFilter 진행 URI = {}", request.getRequestURI());
         filterChain.doFilter(request, response);
     }
 

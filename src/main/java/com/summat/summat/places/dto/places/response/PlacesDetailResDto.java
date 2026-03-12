@@ -39,6 +39,8 @@ public class PlacesDetailResDto {
 
     private long likeCount;
 
+    private boolean liked;
+
     private long viewCount;
 
     private Instant createdAt;

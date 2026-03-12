@@ -23,7 +23,7 @@ public interface PlacesRepository extends JpaRepository<Places, Long> {
 
     @Modifying
     @Query("UPDATE Places p SET p.viewCount = p.viewCount + 1 WHERE p.id = :placeId")
-    boolean increaseViews(@Param("placeId") Long placeId);
+    int increaseViews(@Param("placeId") Long placeId);
 
     @Query(value = "SELECT " +
                         "p.places_id            AS placesId, " +

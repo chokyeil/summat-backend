@@ -42,6 +42,9 @@ public class ReplyService {
             if (parent.getDepth() != 0) {
                 throw new IllegalArgumentException("대댓글에는 답글을 달 수 없습니다.");
             }
+            if (parent.isDeleted()) {
+                throw new IllegalArgumentException("삭제된 댓글에는 답글을 달 수 없습니다.");
+            }
             reply.setParent(parent);
             reply.setDepth(1);
         } else {

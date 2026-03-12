@@ -26,6 +26,7 @@ public enum ResponseCode {
     PLACE_DETAIL_SUCCESS(200, HttpStatus.OK, "장소 상세 조회 성공"),
     PLACE_VIEW_INCREMENTED(200, HttpStatus.OK, "조회수가 증가되었습니다."),
     PLACE_LIKE_SUCCESS(200, HttpStatus.OK, "좋아요를 눌렀습니다."),
+    PLACE_LIKE_CANCELLED(200, HttpStatus.OK, "좋아요가 취소되었습니다."),
     PLACE_ALREADY_LIKED(409, HttpStatus.CONFLICT, "이미 좋아요한 장소입니다."),
     PLACE_NOT_FOUND(404, HttpStatus.NOT_FOUND, "장소를 찾을 수 없습니다."),
 
