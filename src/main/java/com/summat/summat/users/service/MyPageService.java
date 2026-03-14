@@ -1,6 +1,5 @@
 package com.summat.summat.users.service;
 
-import com.summat.summat.enums.RoleType;
 import com.summat.summat.places.entity.PlaceLike;
 import com.summat.summat.places.entity.Places;
 import com.summat.summat.places.repository.PlaceLikeRepository;
@@ -77,12 +76,8 @@ public class MyPageService {
 
         if(newPassword.equals(getNewPasswordConfirm)) {
 
-            Users userChange = new Users();
-            userChange.setEmail(user.getEmail());
-            userChange.setUserPw(passwordEncoder.encode(newPassword));
-            userChange.setUserNickName(user.getUserNickName());
-            userChange.setRole(RoleType.ROLE_USER);
-            usersRepository.save(userChange);
+            user.setUserPw(passwordEncoder.encode(newPassword));
+            usersRepository.save(user);
 
             return true;
         } else {

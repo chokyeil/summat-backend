@@ -45,7 +45,7 @@ public class EmailVerificationService {
         repository.findTopByEmailAndPurposeOrderByCreatedAtDesc(email, purpose).ifPresent(latest -> {
             if (latest.getLastSentAt() != null &&
                     latest.getLastSentAt().plusSeconds(cooldownSeconds).isAfter(now)) {
-                throw new RuntimeException("요청이 너무 잦습니다. 잠시 후 다시 시도해주세요.");
+                throw new RuntimeException("재발송은 60초 후에 가능합니다.");
             }
         });
 
@@ -61,8 +61,6 @@ public class EmailVerificationService {
         ev.setLastSentAt(now);
 
         repository.save(ev);
-
-        log.info("[DEV][EMAIL-OTP] email={}, purpose={}, code={}", email, purpose, code);
 
         // 메일 발송
         try {

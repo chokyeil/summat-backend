@@ -60,10 +60,6 @@ public class UsersService {
         Users user = usersRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("유저 없음"));
 
-        log.info("currentPassword encoding = " + passwordEncoder.encode(currentPassword));
-        log.info("findPassword encoding = " + user.getUserPw());
-
-
         return passwordEncoder.matches(currentPassword, user.getUserPw());
 
 

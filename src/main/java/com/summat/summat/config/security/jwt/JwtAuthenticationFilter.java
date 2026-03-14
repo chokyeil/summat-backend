@@ -47,7 +47,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         if (header != null && header.startsWith("Bearer ")) {
             String token = header.substring(7);
-            log.info("[JWT FILTER] token = " + token);
 
             if (jwtTokenProvider.validateToken(token)) {
                 log.info("[JWT FILTER] 토큰 유효");

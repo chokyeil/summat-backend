@@ -7,16 +7,19 @@ import com.summat.summat.users.dto.users.PasswordCheckReqDto;
 import com.summat.summat.users.dto.users.UsersReqDto;
 import com.summat.summat.users.service.UsersService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 
 
+@Validated
 @RestController
 @RequestMapping("/summatUsers")
 @RequiredArgsConstructor
@@ -25,7 +28,8 @@ public class UsersController {
     private final UsersService usersService;
 
     @GetMapping("/id-check")
-    public ResponseEntity<ApiResponse> checkCurrentUserId(@RequestParam String email) {
+    public ResponseEntity<ApiResponse> checkCurrentUserId(
+            @RequestParam @Email(message = "올바른 이메일 형식이 아닙니다.") String email) {
         boolean isUserId = usersService.checkCurrentEmail(email);
 
         return ResponseEntity.status(!isUserId ? ResponseCode.USERID_AVAILABLE.getHttpStatus() : ResponseCode.USERID_DUPLICATED.getHttpStatus())
@@ -36,11 +40,8 @@ public class UsersController {
     @PostMapping("/signup")
     public ResponseEntity<ApiResponse> signUp(@RequestBody @Valid UsersReqDto usersReqDto) {
         log.info("UsersController signUp getEmail = " + usersReqDto.getEmail());
-        log.info("UsersController signUp userPw = " + usersReqDto.getUserPw());
-        log.info("UsersController signUp userNickName = " + usersReqDto.getUserNickName());
 
         boolean saveResult = usersService.signUp(usersReqDto);
-        log.info("UsersController signUp saveResult = " + saveResult);
 
         return ResponseEntity
                 .status(saveResult ? ResponseCode.SIGNUP_SUCCESS.getHttpStatus() : ResponseCode.SIGNUP_FAIL.getHttpStatus())
