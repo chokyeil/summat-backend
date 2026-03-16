@@ -1,6 +1,7 @@
 package com.summat.summat.places.service;
 
 import com.summat.summat.enums.PlaceTagType;
+import com.summat.summat.enums.RegionType;
 import com.summat.summat.places.dto.places.response.PlaceListPageResDto;
 import com.summat.summat.places.dto.places.response.PlaceLikeResDto;
 import com.summat.summat.places.dto.places.response.PlaceMainListResDto;
@@ -264,11 +265,23 @@ public class PlacesService {
                                                 List<String> tags,
                                                 Long userId) {
 
-        List<String> regionsParam = (regions == null || regions.isEmpty())
-                ? List.of("__DUMMY__")   // 절대 존재하지 않을 값
-                : regions;
+        // region 전처리: 허용 광역 단위 검증 + "전국" 해석
+        List<String> resolvedRegions = new ArrayList<>();
+        if (regions != null) {
+            for (String r : regions) {
+                String trimmed = (r == null) ? "" : r.trim();
+                if (trimmed.isBlank() || "전국".equals(trimmed)) {
+                    continue; // null/blank/"전국" → 전체 조회로 해석, 필터 제외
+                }
+                if (RegionType.fromName(trimmed) == null) {
+                    throw new IllegalArgumentException("지원하지 않는 지역입니다: " + trimmed);
+                }
+                resolvedRegions.add(trimmed);
+            }
+        }
 
-        boolean regionEmpty = (regions == null || regions.isEmpty());
+        boolean regionEmpty = resolvedRegions.isEmpty();
+        List<String> regionsParam = regionEmpty ? List.of("__DUMMY__") : resolvedRegions;
 
         List<String> categoriesParam = (categories == null || categories.isEmpty())
                 ? List.of("__DUMMY__")
