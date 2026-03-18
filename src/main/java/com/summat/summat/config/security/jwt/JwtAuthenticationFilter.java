@@ -31,31 +31,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     ) throws ServletException, IOException {
 
         String uri = request.getRequestURI();
-        log.info("[JWT FILTER] URI = " + uri);
-
-//        if (uri.startsWith("/auth")
-//                || uri.equals("/summatUsers/signup")
-//                || uri.equals("/places/list")
-//                || uri.equals("/places/detail")) {
-//            log.info("[JWT FILTER] 화이트리스트 → 그냥 통과");
-//            filterChain.doFilter(request, response);
-//            return;
-//        }
+        log.debug("[JWT FILTER] URI = {}", uri);
 
         String header = request.getHeader("Authorization");
-        log.info("[JWT FILTER] Authorization = " + header);
 
         if (header != null && header.startsWith("Bearer ")) {
             String token = header.substring(7);
 
             if (jwtTokenProvider.validateToken(token)) {
-                log.info("[JWT FILTER] 토큰 유효");
-
                 String username = jwtTokenProvider.getUsername(token);
-                log.info("[JWT FILTER] username = " + username);
+                log.debug("[JWT FILTER] 토큰 유효, username = {}", username);
 
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-                log.info("[JWT FILTER] userDetails = " + userDetails.getUsername());
 
                 UsernamePasswordAuthenticationToken authToken =
                         new UsernamePasswordAuthenticationToken(
@@ -64,20 +51,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                 userDetails.getAuthorities()
                         );
 
-                log.info("[JWT FILTER] authentication created = {}", authToken);
-
                 SecurityContextHolder.getContext().setAuthentication(authToken);
-
-                log.info("[JWT FILTER] SecurityContext authentication = {}",
-                        SecurityContextHolder.getContext().getAuthentication());
             } else {
-                log.info("[JWT FILTER] 토큰 유효하지 않음");
+                log.debug("[JWT FILTER] 토큰 유효하지 않음");
             }
         } else {
-            log.info("[JWT FILTER] Authorization 헤더 없음 또는 Bearer 아님");
+            log.debug("[JWT FILTER] Authorization 헤더 없음 또는 Bearer 아님");
         }
 
-        log.info("[JWT FILTER] filterChain.doFilter 진행 URI = {}", request.getRequestURI());
+        log.debug("[JWT FILTER] filterChain.doFilter 진행 URI = {}", uri);
         filterChain.doFilter(request, response);
     }
 

@@ -68,6 +68,15 @@ public class PlacesService {
             return false;
         }
         log.info("PlacesService 진입!!");
+
+        // region 유효성 검사
+        String regionValue = placesReqDto.getRegion();
+        if (regionValue != null && !regionValue.isBlank()) {
+            if (RegionType.fromName(regionValue) == null) {
+                throw new IllegalArgumentException("지원하지 않는 지역입니다: " + regionValue);
+            }
+        }
+
         String imageUrl = savePlaceImage(image);
 
         Places place = new Places();
@@ -78,7 +87,7 @@ public class PlacesService {
         place.setImageUrl(imageUrl);
         place.setSummary(placesReqDto.getSummary());
         place.setCategory(placesReqDto.getCategory());
-        place.setRegion(placesReqDto.getRegion());
+        place.setRegion(regionValue);
         place.setCreatedBy(user);
 
         if (placesReqDto.getTags() != null) {
@@ -149,6 +158,14 @@ public class PlacesService {
 
         if (updatePlace == null) return false;
 
+        // region 유효성 검사
+        String regionValue = placesReqDto.getRegion();
+        if (regionValue != null && !regionValue.isBlank()) {
+            if (RegionType.fromName(regionValue) == null) {
+                throw new IllegalArgumentException("지원하지 않는 지역입니다: " + regionValue);
+            }
+        }
+
         String imageUrl = savePlaceImage(image);
 
         updatePlace.setName(placesReqDto.getPlaceName());
@@ -160,7 +177,7 @@ public class PlacesService {
         }
         updatePlace.setSummary(placesReqDto.getSummary());
         updatePlace.setCategory(placesReqDto.getCategory());
-        updatePlace.setRegion(placesReqDto.getRegion());
+        updatePlace.setRegion(regionValue);
         updatePlace.setCreatedBy(user);
 
         if (placesReqDto.getTags() != null) {

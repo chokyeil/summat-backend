@@ -99,7 +99,12 @@ public class SecurityConfig {
 
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
-        config.setAllowedOriginPatterns(List.of("http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:5173", "http://127.0.0.1:5173"));
+        config.setAllowedOriginPatterns(List.of(
+                "http://localhost:3000", "http://127.0.0.1:3000",
+                "http://localhost:5173", "http://127.0.0.1:5173",
+                "https://summat.site",          // TODO: 실제 운영 도메인으로 교체
+                "https://www.summat.site"        // TODO: www 서브도메인 필요 시 유지
+        ));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setExposedHeaders(List.of("Authorization"));
