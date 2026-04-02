@@ -63,6 +63,7 @@ public class SecurityConfig {
 
                         // 정적 리소스
                         .requestMatchers(HttpMethod.GET, "/uploads/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/images/**").permitAll()
                         // .requestMatchers("/", "/index.html", "/static/**").permitAll()
                         // 나머지는 인증 필요
                         .anyRequest().authenticated()

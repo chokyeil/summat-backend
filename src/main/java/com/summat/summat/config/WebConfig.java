@@ -16,9 +16,13 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
 
-        // 장소 이미지
+        // 장소 이미지 (실제 업로드)
         registry.addResourceHandler("/uploads/places/**")
                 .addResourceLocations("file:" + uploadDir + "/places/");
+
+        // 운영 시연용 placeholder 이미지
+        registry.addResourceHandler("/images/placeholder/**")
+                .addResourceLocations("file:" + uploadDir + "/placeholder/");
     }
 
     @Override
